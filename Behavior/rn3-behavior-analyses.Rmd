@@ -1,0 +1,598 @@
+---
+title: "rn3-behavior-analyses"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r packages, include = 'false'}
+library(Rmisc)
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(wesanderson)
+library(gridExtra)
+```
+
+## Open datafile
+
+Open the original csv files and combine for every session and participant
+```{r open data}
+path = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn3 - Sequential encoding/Data/Lab data/logfiles/'
+
+subjectIDs = c('s01', 's02', 's03', 's04', 's05', 's07', 's08', 's09', 's10', 's11', 's12', 's13', 's14', 's15', 's16', 's17', 's18', 's19', 's21', 's22', 's23', 's24', 's25', 's26', 's27')
+sessions = c('a', 'b')
+
+data = c() # Empty to start
+
+for (sID in subjectIDs){
+
+  for (ses in sessions){
+    filename = paste('rn3_', sID, ses, '.csv', sep = "")
+    sub_data = read.csv(paste(path, filename, sep = ""))
+    
+    numtrials = dim(sub_data)[1] # number of rows in new file
+    sub_data$subjectID = rep(sID, numtrials)
+    
+    data = rbind(data, sub_data) # Add every session to 1 file
+  }
+  
+}
+
+head(data)
+
+```
+
+## Clean data
+
+Clean the data by decision times
+
+```{r hist raw data}
+histogram(data$responseTime)
+```
+
+```{r clean data}
+slow_trials_all = c()
+
+for (sub in unique(data$subjectID)){
+  
+  mean_sub = mean(data$responseTime[which(data$subjectID == sub)])
+  sd_sub = sd(data$responseTime[which(data$subjectID == sub)]) * 2.5
+  
+  cutoff_slow = mean_sub + sd_sub
+  
+  slow_trials_sub = which(data$subjectID == sub & data$responseTime > cutoff_slow)
+  
+  if (length(slow_trials_sub) >= 1){
+    slow_trials_all = c(slow_trials_all, slow_trials_sub)
+  }
+  
+}
+
+slow_trials_all = as.numeric(slow_trials_all)
+
+data$responseTimeClean = data$responseTime
+data$responseTimeClean[slow_trials_all] = NaN
+data$responseTimeClean[which(data$responseTime >= 5)] = NaN
+data$responseTimeClean[which(data$responseTime <= 0.1)] = NaN
+
+data$goodBadTrials = T
+data$goodBadTrials[slow_trials_all] = F
+data$goodBadTrials[which(data$responseTime >= 5)] = F
+data$goodBadTrials[which(data$responseTime <= 0.1)] = F
+
+```
+
+```{r hist clean data}
+histogram(data$responseTimeClean)
+```
+
+## Conditions as factors
+
+```{r as factors}
+
+data$subjectID = as.factor(data$subjectID)
+
+data$targetMoment = as.factor(data$targetMoment)
+levels(data$targetMoment) = c("Early", "Late")
+
+data$loadType = as.factor(data$loadType)
+levels(data$loadType) = c("One", "Two")
+
+data$dialType = as.factor(data$dialType)
+levels(data$dialType) = c("Up", "Right")
+
+data$colProbed = as.factor(data$colProbed)
+levels(data$colProbed) = c("Green", "Blue", "Yellow", "Red")
+
+data$clockwise = as.factor(data$clockwise)
+
+```
+
+## Median split performance 
+
+```{r median split performance}
+
+med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment), FUN = median, na.rm=TRUE)
+data$fastSlow = data$responseTimeClean
+
+med.err.subj = tapply(data$difference, list(data$subjectID, data$loadType, data$targetMoment), FUN = median, na.rm=TRUE)
+data$precImprec = data$difference
+
+for (sub in 1:length(levels(data$subjectID))){
+  for (load in 1:length(levels(data$loadType))){
+    for (tmom in 1:length(levels(data$targetMoment))){
+       
+      this.med.RT = med.RT1.subj[sub,load,tmom]
+      this.med.err = med.err.subj[sub,load,tmom]
+       
+      this.sub = levels(data$subjectID)[sub]
+      this.load = levels(data$loadType)[load]
+      this.tmom = levels(data$targetMoment)[tmom]
+       
+      data$fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$responseTimeClean > this.med.RT] = 'slow'
+      data$fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$responseTimeClean < this.med.RT] = 'fast'
+      data$fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$responseTimeClean == this.med.RT] = NaN
+       
+      data$precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$difference > this.med.err] = 'imprec'
+      data$precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$difference < this.med.err] = 'prec'
+      data$precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$difference == this.med.err] = NaN
+       
+    }
+  } 
+}
+
+data$fastSlow[is.nan(data$responseTimeClean)] = NaN
+
+```
+## Median split performance - tryout extra variables (dial type, required hand)
+
+```{r median split performance - tryout extra var}
+
+# Load x moment
+
+med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment), FUN = median, na.rm=TRUE)
+fastSlow = data$responseTimeClean
+
+for (sub in 1:length(levels(data$subjectID))){
+  for (load in 1:length(levels(data$loadType))){
+    for (tmom in 1:length(levels(data$targetMoment))){
+       
+      this.med.RT = med.RT1.subj[sub,load,tmom]
+       
+      this.sub = levels(data$subjectID)[sub]
+      this.load = levels(data$loadType)[load]
+      this.tmom = levels(data$targetMoment)[tmom]
+       
+      fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$responseTimeClean > this.med.RT] = 'slow'
+      fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$responseTimeClean < this.med.RT] = 'fast'
+      fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$responseTimeClean == this.med.RT] = NaN
+      
+    }
+  } 
+}
+
+fastSlow[is.nan(data$responseTimeClean)] = NaN
+
+# Load x moment x dial
+
+med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$dialType), FUN = median, na.rm=TRUE)
+fastSlow_dial = data$responseTimeClean
+
+for (sub in 1:length(levels(data$subjectID))){
+  for (load in 1:length(levels(data$loadType))){
+    for (tmom in 1:length(levels(data$targetMoment))){
+      for (dial in 1:length(levels(data$dialType))){
+        this.med.RT = med.RT1.subj[sub,load,tmom,dial]
+       
+        this.sub = levels(data$subjectID)[sub]
+        this.load = levels(data$loadType)[load]
+        this.tmom = levels(data$targetMoment)[tmom]
+        this.dial = levels(data$dialType)[dial]
+       
+        fastSlow_dial[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$responseTimeClean > this.med.RT] = 'slow'
+        fastSlow_dial[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$responseTimeClean < this.med.RT] = 'fast'
+        fastSlow_dial[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$responseTimeClean == this.med.RT] = NaN
+               
+      }
+    }
+  } 
+}
+
+fastSlow_dial[is.nan(data$responseTimeClean)] = NaN
+
+# Load x moment x response hand
+
+med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$clockwise), FUN = median, na.rm=TRUE)
+fastSlow_hand = data$responseTimeClean
+
+for (sub in 1:length(levels(data$subjectID))){
+  for (load in 1:length(levels(data$loadType))){
+    for (tmom in 1:length(levels(data$targetMoment))){
+      for (hand in 1:length(levels(data$clockwise))){
+        this.med.RT = med.RT1.subj[sub,load,tmom,hand]
+       
+        this.sub = levels(data$subjectID)[sub]
+        this.load = levels(data$loadType)[load]
+        this.tmom = levels(data$targetMoment)[tmom]
+        this.hand = levels(data$clockwise)[hand]
+       
+        fastSlow_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$clockwise == this.hand & data$responseTimeClean > this.med.RT] = 'slow'
+        fastSlow_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$clockwise == this.hand & data$responseTimeClean < this.med.RT] = 'fast'
+        fastSlow_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$clockwise == this.hand & data$responseTimeClean == this.med.RT] = NaN
+               
+      }
+    }
+  } 
+}
+
+fastSlow_hand[is.nan(data$responseTimeClean)] = NaN
+
+# Load x moment x required response hand
+
+data$requiredResponse = data$targetTilt
+
+for (trial in 1:length(data$dialType)){
+  if (data$dialType[trial] == "Right"){
+    data$requiredResponse[trial] = 1 - data$requiredResponse[trial]
+  }
+}
+
+data$requiredResponse = as.factor(data$requiredResponse)
+
+med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$requiredResponse), FUN = median, na.rm=TRUE)
+fastSlow_reqhand = data$responseTimeClean
+
+for (sub in 1:length(levels(data$subjectID))){
+  for (load in 1:length(levels(data$loadType))){
+    for (tmom in 1:length(levels(data$targetMoment))){
+      for (hand in 1:length(levels(data$clockwise))){
+        this.med.RT = med.RT1.subj[sub,load,tmom,hand]
+       
+        this.sub = levels(data$subjectID)[sub]
+        this.load = levels(data$loadType)[load]
+        this.tmom = levels(data$targetMoment)[tmom]
+        this.hand = levels(data$requiredResponse)[hand]
+       
+        fastSlow_reqhand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$requiredResponse == this.hand & data$responseTimeClean > this.med.RT] = 'slow'
+        fastSlow_reqhand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$requiredResponse == this.hand & data$responseTimeClean < this.med.RT] = 'fast'
+        fastSlow_reqhand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$requiredResponse == this.hand & data$responseTimeClean == this.med.RT] = NaN
+               
+      }
+    }
+  } 
+}
+
+fastSlow_reqhand[is.nan(data$responseTimeClean)] = NaN
+
+# Load x moment x item location x response hand
+
+data$targetLocation = as.factor(data$targetLocation)
+
+med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$targetLocation, data$clockwise), FUN = median, na.rm=TRUE)
+fastSlow_tloc_hand = data$responseTimeClean
+
+for (sub in 1:length(levels(data$subjectID))){
+  for (load in 1:length(levels(data$loadType))){
+    for (tmom in 1:length(levels(data$targetMoment))){
+      for (tloc in 1:length(levels(data$targetLocation))){
+        for (hand in 1:length(levels(data$clockwise))){
+          this.med.RT = med.RT1.subj[sub,load,tmom,tloc,hand]
+       
+          this.sub = levels(data$subjectID)[sub]
+          this.load = levels(data$loadType)[load]
+          this.tmom = levels(data$targetMoment)[tmom]
+          this.tloc = levels(data$targetLocation)[tloc]
+          this.hand = levels(data$clockwise)[hand]
+       
+          fastSlow_tloc_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean > this.med.RT] = 'slow'
+          fastSlow_tloc_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean < this.med.RT] = 'fast'
+          fastSlow_tloc_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean == this.med.RT] = NaN
+               
+        }
+      }
+    }
+  } 
+}
+
+fastSlow_tloc_hand[is.nan(data$responseTimeClean)] = NaN
+
+
+# Load x moment x dial x response hand
+
+med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$dialType, data$clockwise), FUN = median, na.rm=TRUE)
+fastSlow_dial_hand = data$responseTimeClean
+
+for (sub in 1:length(levels(data$subjectID))){
+  for (load in 1:length(levels(data$loadType))){
+    for (tmom in 1:length(levels(data$targetMoment))){
+      for (dial in 1:length(levels(data$dialType))){
+        for (hand in 1:length(levels(data$clockwise))){
+          this.med.RT = med.RT1.subj[sub,load,tmom,dial,hand]
+       
+          this.sub = levels(data$subjectID)[sub]
+          this.load = levels(data$loadType)[load]
+          this.tmom = levels(data$targetMoment)[tmom]
+          this.dial = levels(data$dialType)[dial]
+          this.hand = levels(data$clockwise)[hand]
+       
+          fastSlow_dial_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$clockwise == this.hand & data$responseTimeClean > this.med.RT] = 'slow'
+          fastSlow_dial_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$clockwise == this.hand & data$responseTimeClean < this.med.RT] = 'fast'
+          fastSlow_dial_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$clockwise == this.hand & data$responseTimeClean == this.med.RT] = NaN
+               
+        }
+      }
+    }
+  } 
+}
+
+fastSlow_dial_hand[is.nan(data$responseTimeClean)] = NaN
+
+# Load x moment x dial x location x response hand
+
+med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$dialType, data$targetLocation, data$clockwise), FUN = median, na.rm=TRUE)
+fastSlow_dial_tloc_hand = data$responseTimeClean
+
+for (sub in 1:length(levels(data$subjectID))){
+  for (load in 1:length(levels(data$loadType))){
+    for (tmom in 1:length(levels(data$targetMoment))){
+      for (dial in 1:length(levels(data$dialType))){
+        for (tloc in 1:length(levels(data$targetLocation))){
+          for (hand in 1:length(levels(data$clockwise))){
+            this.med.RT = med.RT1.subj[sub,load,tmom,dial,tloc,hand]
+       
+            this.sub = levels(data$subjectID)[sub]
+            this.load = levels(data$loadType)[load]
+            this.tmom = levels(data$targetMoment)[tmom]
+            this.dial = levels(data$dialType)[dial]
+            this.tloc = levels(data$targetLocation)[tloc]
+            this.hand = levels(data$clockwise)[hand]
+       
+            fastSlow_dial_tloc_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean > this.med.RT] = 'slow'
+            fastSlow_dial_tloc_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean < this.med.RT] = 'fast'
+            fastSlow_dial_tloc_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean == this.med.RT] = NaN
+          }    
+        }
+      }
+    }
+  } 
+}
+
+fastSlow_dial_tloc_hand[is.nan(data$responseTimeClean)] = NaN
+
+# Overlap
+sum(fastSlow == fastSlow_dial)/length(fastSlow)*100
+sum(fastSlow == fastSlow_hand)/length(fastSlow)*100
+sum(fastSlow == fastSlow_reqhand)/length(fastSlow)*100
+
+sum(fastSlow == fastSlow_tloc_hand)/length(fastSlow)*100
+sum(fastSlow == fastSlow_dial_hand)/length(fastSlow)*100
+sum(fastSlow == fastSlow_dial_tloc_hand)/length(fastSlow)*100
+
+data$fastSlow_dial_tloc_hand = fastSlow_dial_tloc_hand
+
+```
+
+## Save data
+
+```{r save clean data file}
+write.csv(data, '/Users/rosenasrawi/Documents/VU PhD/Projects/rn3 - Sequential encoding/Data/Processed/Behavior/logfiles_combined_rn3.csv', row.names=FALSE, quote=FALSE) 
+
+```
+
+## Summarise the data
+
+### Decision times
+
+
+```{r DT: load x targetmoment, upper & right}
+
+summary.rt.subj.load.moment.dial = aggregate(data = data, 
+                                             responseTimeClean ~ subjectID + dialType + loadType + targetMoment, 
+                                             mean)
+
+summary.rt.load.moment.dial = summarySEwithin(data = summary.rt.subj.load.moment.dial,
+                                              measurevar = "responseTimeClean",
+                                              withinvars = c("dialType", "loadType", "targetMoment"),
+                                              idvar = "subjectID")
+
+summary.rt.subj.colprobed = aggregate(data = data,
+                                      responseTimeClean ~ subjectID + colProbed,
+                                      mean)
+summary.rt.colprobed = summarySEwithin(data = summary.rt.subj.colprobed,
+                                       measurevar = "responseTimeClean",
+                                       withinvars = c("colProbed"))
+
+
+summary.rt.subj.load.moment.dial
+summary.rt.load.moment.dial
+```
+
+### Errors
+
+
+```{r Err: load x targetmoment, upper & right}
+
+summary.err.subj.load.moment.dial = aggregate(data = data, 
+                                              difference ~ subjectID + dialType + loadType + targetMoment, 
+                                              mean)
+
+summary.err.load.moment.dial = summarySEwithin(data = summary.err.subj.load.moment.dial,
+                                               measurevar = "difference",
+                                               withinvars = c("dialType", "loadType", "targetMoment"),
+                                               idvar = "subjectID")
+
+summary.err.subj.colprobed = aggregate(data = data,
+                                      difference ~ subjectID + colProbed,
+                                      mean)
+summary.err.colprobed = summarySEwithin(data = summary.err.subj.colprobed,
+                                       measurevar = "difference",
+                                       withinvars = c("colProbed"))
+
+
+```
+
+## Plot the data
+
+### Plot settings
+```{r plot settings}
+
+text.theme = theme(plot.title = element_text(size = 15, 
+                                             hjust = 0.5, 
+                                             lineheight = 1.2,
+                                             family = "Helvetica Neue", 
+                                             face = "bold"),
+                   axis.title.x = element_text(size = 14,
+                                               family = "Helvetica Neue",
+                                               face = "bold"),
+                   axis.title.y = element_text(size = 14,
+                                               family = "Helvetica Neue",
+                                               face = "bold"),
+                   axis.text.x = element_text(size = 12,
+                                              family = "Helvetica Neue"),
+                   axis.text.y = element_text(size = 12,
+                                              family = "Helvetica Neue"))
+
+
+legend.theme = theme(legend.position = "bottom",
+                     legend.title = element_text(size = 11,
+                                                 family = "Helvetica Neue",
+                                                 face = "bold"))
+
+legend.none = theme(legend.position = "none")
+
+color_1 = "#8C45AC" # purple
+color_2 = "#D0A1E6" # lilac 
+color_3 = "#50AC7B" # green
+color_4 = "#B1E6C9" # light green
+
+```
+
+## Per subject
+
+### Decision times
+```{r plot DT sub}
+
+ggplot(summary.rt.subj.load.moment.dial, 
+       aes(x = loadType, y = responseTimeClean, 
+           col = interaction(loadType,targetMoment), 
+           fill = interaction(loadType,targetMoment), 
+           group = targetMoment)) +
+  
+  geom_bar(stat = "identity", position = position_dodge(width = 1), 
+           color = "black", width = 0.7, size = 0.4) +
+  
+  scale_fill_manual(values = c(color_1, color_2, color_3, color_4),
+                    breaks = c("One.Early", "One.Late", "Two.Early", "Two.Late"),
+                    name = "Target moment",
+                    labels = c("Early","Late","Early","Late"))+
+  
+  facet_grid(dialType~subjectID, scales = 'free_x')+
+  scale_y_continuous("Decision time (s)") +
+  scale_x_discrete("Memory load") +
+
+  coord_cartesian(ylim = c(0.1,2)) +
+
+  theme_bw() +
+  text.theme +
+  legend.theme
+
+```
+
+### Absolute errors
+```{r plot err sub}
+
+ggplot(summary.err.subj.load.moment.dial, 
+       aes(x = loadType, y = difference, 
+           col = interaction(loadType,targetMoment), 
+           fill = interaction(loadType,targetMoment), 
+           group = targetMoment)) +
+  
+  geom_bar(stat = "identity", position = position_dodge(width = 1), 
+           color = "black", width = 0.7, size = 0.4) +
+  
+  scale_fill_manual(values = c(color_1, color_2, color_3, color_4),
+                    breaks = c("One.Early", "One.Late", "Two.Early", "Two.Late"),
+                    name = "Target moment",
+                    labels = c("Early","Late","Early","Late"))+
+  
+  facet_grid(dialType~subjectID, scales = 'free_x')+
+  scale_y_continuous("Absolute error (degrees)") +
+  scale_x_discrete("Memory load") +
+
+  coord_cartesian(ylim = c(1,40)) +
+
+  theme_bw() +
+  text.theme +
+  legend.theme
+
+```
+
+## Average
+
+### Decision times
+```{r plot DT avr}
+
+ggplot(summary.rt.load.moment.dial, 
+       aes(x = loadType, y = responseTimeClean, 
+           col = interaction(loadType,targetMoment), 
+           fill = interaction(loadType,targetMoment), 
+           group = targetMoment)) +
+  
+  geom_bar(stat = "identity", position = position_dodge(width = 1), 
+           color = "black", width = 0.7, size = 0.4) +
+  
+  geom_errorbar(aes(ymin = responseTimeClean-se, ymax = responseTimeClean+se), width = 0.1, 
+                position = position_dodge(0.9), size = 0.5, color = "black") +  
+  
+  scale_fill_manual(values = c(color_1, color_2, color_3, color_4),
+                    breaks = c("One.Early", "One.Late", "Two.Early", "Two.Late"),
+                    name = "Target moment",
+                    labels = c("Early","Late","Early","Late"))+
+  
+  facet_grid(~dialType, scales = 'free_x')+
+  scale_y_continuous("Decision time (s)") +
+  scale_x_discrete("Memory load") +
+
+  coord_cartesian(ylim = c(0.1,1.5)) +
+
+  theme_bw() +
+  text.theme +
+  legend.theme
+
+```
+
+### Errors
+```{r plot err avr}
+
+ggplot(summary.err.load.moment.dial, 
+       aes(x = loadType, y = difference, 
+           col = interaction(loadType,targetMoment), 
+           fill = interaction(loadType,targetMoment), 
+           group = targetMoment)) +
+  
+  geom_bar(stat = "identity", position = position_dodge(width = 1), 
+           color = "black", width = 0.7, size = 0.4) +
+
+  geom_errorbar(aes(ymin = difference-se, ymax = difference+se), width = 0.1, 
+                position = position_dodge(0.9), size = 0.5, color = "black") +  
+  
+  scale_fill_manual(values = c(color_1, color_2, color_3, color_4),
+                    breaks = c("One.Early", "One.Late", "Two.Early", "Two.Late"),
+                    name = "Target moment",
+                    labels = c("Early","Late","Early","Late"))+
+  
+  facet_grid(~dialType, scales = 'free_x')+
+  scale_y_continuous("Absolute error (degrees)") +
+  scale_x_discrete("Memory load") +
+
+  coord_cartesian(ylim = c(1,23)) +
+
+  theme_bw() +
+  text.theme +
+  legend.theme
+
+```
