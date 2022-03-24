@@ -96,14 +96,16 @@ histogram(data$responseTimeClean)
 
 data$subjectID = as.factor(data$subjectID)
 
-data$targetMoment = as.factor(data$targetMoment)
-levels(data$targetMoment) = c("Early", "Late")
-
 data$loadType = as.factor(data$loadType)
 levels(data$loadType) = c("One", "Two")
 
+data$targetMoment = as.factor(data$targetMoment)
+levels(data$targetMoment) = c("Early", "Late")
+
 data$dialType = as.factor(data$dialType)
 levels(data$dialType) = c("Up", "Right")
+
+data$targetLocation = as.factor(data$targetLocation)
 
 data$colProbed = as.factor(data$colProbed)
 levels(data$colProbed) = c("Green", "Blue", "Yellow", "Red")
@@ -116,225 +118,11 @@ data$clockwise = as.factor(data$clockwise)
 
 ```{r median split performance}
 
-med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment), FUN = median, na.rm=TRUE)
-data$fastSlow = data$responseTimeClean
-
-med.err.subj = tapply(data$difference, list(data$subjectID, data$loadType, data$targetMoment), FUN = median, na.rm=TRUE)
-data$precImprec = data$difference
-
-for (sub in 1:length(levels(data$subjectID))){
-  for (load in 1:length(levels(data$loadType))){
-    for (tmom in 1:length(levels(data$targetMoment))){
-       
-      this.med.RT = med.RT1.subj[sub,load,tmom]
-      this.med.err = med.err.subj[sub,load,tmom]
-       
-      this.sub = levels(data$subjectID)[sub]
-      this.load = levels(data$loadType)[load]
-      this.tmom = levels(data$targetMoment)[tmom]
-       
-      data$fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$responseTimeClean > this.med.RT] = 'slow'
-      data$fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$responseTimeClean < this.med.RT] = 'fast'
-      data$fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$responseTimeClean == this.med.RT] = NaN
-       
-      data$precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$difference > this.med.err] = 'imprec'
-      data$precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$difference < this.med.err] = 'prec'
-      data$precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$difference == this.med.err] = NaN
-       
-    }
-  } 
-}
-
-data$fastSlow[is.nan(data$responseTimeClean)] = NaN
-
-```
-## Median split performance - tryout extra variables (dial type, required hand)
-
-```{r median split performance - tryout extra var}
-
-# Load x moment
-
-med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment), FUN = median, na.rm=TRUE)
+med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$dialType, data$targetLocation, data$clockwise), FUN = median, na.rm=TRUE)
 fastSlow = data$responseTimeClean
 
-for (sub in 1:length(levels(data$subjectID))){
-  for (load in 1:length(levels(data$loadType))){
-    for (tmom in 1:length(levels(data$targetMoment))){
-       
-      this.med.RT = med.RT1.subj[sub,load,tmom]
-       
-      this.sub = levels(data$subjectID)[sub]
-      this.load = levels(data$loadType)[load]
-      this.tmom = levels(data$targetMoment)[tmom]
-       
-      fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$responseTimeClean > this.med.RT] = 'slow'
-      fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$responseTimeClean < this.med.RT] = 'fast'
-      fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$responseTimeClean == this.med.RT] = NaN
-      
-    }
-  } 
-}
-
-fastSlow[is.nan(data$responseTimeClean)] = NaN
-
-# Load x moment x dial
-
-med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$dialType), FUN = median, na.rm=TRUE)
-fastSlow_dial = data$responseTimeClean
-
-for (sub in 1:length(levels(data$subjectID))){
-  for (load in 1:length(levels(data$loadType))){
-    for (tmom in 1:length(levels(data$targetMoment))){
-      for (dial in 1:length(levels(data$dialType))){
-        this.med.RT = med.RT1.subj[sub,load,tmom,dial]
-       
-        this.sub = levels(data$subjectID)[sub]
-        this.load = levels(data$loadType)[load]
-        this.tmom = levels(data$targetMoment)[tmom]
-        this.dial = levels(data$dialType)[dial]
-       
-        fastSlow_dial[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$responseTimeClean > this.med.RT] = 'slow'
-        fastSlow_dial[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$responseTimeClean < this.med.RT] = 'fast'
-        fastSlow_dial[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$responseTimeClean == this.med.RT] = NaN
-               
-      }
-    }
-  } 
-}
-
-fastSlow_dial[is.nan(data$responseTimeClean)] = NaN
-
-# Load x moment x response hand
-
-med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$clockwise), FUN = median, na.rm=TRUE)
-fastSlow_hand = data$responseTimeClean
-
-for (sub in 1:length(levels(data$subjectID))){
-  for (load in 1:length(levels(data$loadType))){
-    for (tmom in 1:length(levels(data$targetMoment))){
-      for (hand in 1:length(levels(data$clockwise))){
-        this.med.RT = med.RT1.subj[sub,load,tmom,hand]
-       
-        this.sub = levels(data$subjectID)[sub]
-        this.load = levels(data$loadType)[load]
-        this.tmom = levels(data$targetMoment)[tmom]
-        this.hand = levels(data$clockwise)[hand]
-       
-        fastSlow_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$clockwise == this.hand & data$responseTimeClean > this.med.RT] = 'slow'
-        fastSlow_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$clockwise == this.hand & data$responseTimeClean < this.med.RT] = 'fast'
-        fastSlow_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$clockwise == this.hand & data$responseTimeClean == this.med.RT] = NaN
-               
-      }
-    }
-  } 
-}
-
-fastSlow_hand[is.nan(data$responseTimeClean)] = NaN
-
-# Load x moment x required response hand
-
-data$requiredResponse = data$targetTilt
-
-for (trial in 1:length(data$dialType)){
-  if (data$dialType[trial] == "Right"){
-    data$requiredResponse[trial] = 1 - data$requiredResponse[trial]
-  }
-}
-
-data$requiredResponse = as.factor(data$requiredResponse)
-
-med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$requiredResponse), FUN = median, na.rm=TRUE)
-fastSlow_reqhand = data$responseTimeClean
-
-for (sub in 1:length(levels(data$subjectID))){
-  for (load in 1:length(levels(data$loadType))){
-    for (tmom in 1:length(levels(data$targetMoment))){
-      for (hand in 1:length(levels(data$clockwise))){
-        this.med.RT = med.RT1.subj[sub,load,tmom,hand]
-       
-        this.sub = levels(data$subjectID)[sub]
-        this.load = levels(data$loadType)[load]
-        this.tmom = levels(data$targetMoment)[tmom]
-        this.hand = levels(data$requiredResponse)[hand]
-       
-        fastSlow_reqhand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$requiredResponse == this.hand & data$responseTimeClean > this.med.RT] = 'slow'
-        fastSlow_reqhand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$requiredResponse == this.hand & data$responseTimeClean < this.med.RT] = 'fast'
-        fastSlow_reqhand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$requiredResponse == this.hand & data$responseTimeClean == this.med.RT] = NaN
-               
-      }
-    }
-  } 
-}
-
-fastSlow_reqhand[is.nan(data$responseTimeClean)] = NaN
-
-# Load x moment x item location x response hand
-
-data$targetLocation = as.factor(data$targetLocation)
-
-med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$targetLocation, data$clockwise), FUN = median, na.rm=TRUE)
-fastSlow_tloc_hand = data$responseTimeClean
-
-for (sub in 1:length(levels(data$subjectID))){
-  for (load in 1:length(levels(data$loadType))){
-    for (tmom in 1:length(levels(data$targetMoment))){
-      for (tloc in 1:length(levels(data$targetLocation))){
-        for (hand in 1:length(levels(data$clockwise))){
-          this.med.RT = med.RT1.subj[sub,load,tmom,tloc,hand]
-       
-          this.sub = levels(data$subjectID)[sub]
-          this.load = levels(data$loadType)[load]
-          this.tmom = levels(data$targetMoment)[tmom]
-          this.tloc = levels(data$targetLocation)[tloc]
-          this.hand = levels(data$clockwise)[hand]
-       
-          fastSlow_tloc_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean > this.med.RT] = 'slow'
-          fastSlow_tloc_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean < this.med.RT] = 'fast'
-          fastSlow_tloc_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean == this.med.RT] = NaN
-               
-        }
-      }
-    }
-  } 
-}
-
-fastSlow_tloc_hand[is.nan(data$responseTimeClean)] = NaN
-
-
-# Load x moment x dial x response hand
-
-med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$dialType, data$clockwise), FUN = median, na.rm=TRUE)
-fastSlow_dial_hand = data$responseTimeClean
-
-for (sub in 1:length(levels(data$subjectID))){
-  for (load in 1:length(levels(data$loadType))){
-    for (tmom in 1:length(levels(data$targetMoment))){
-      for (dial in 1:length(levels(data$dialType))){
-        for (hand in 1:length(levels(data$clockwise))){
-          this.med.RT = med.RT1.subj[sub,load,tmom,dial,hand]
-       
-          this.sub = levels(data$subjectID)[sub]
-          this.load = levels(data$loadType)[load]
-          this.tmom = levels(data$targetMoment)[tmom]
-          this.dial = levels(data$dialType)[dial]
-          this.hand = levels(data$clockwise)[hand]
-       
-          fastSlow_dial_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$clockwise == this.hand & data$responseTimeClean > this.med.RT] = 'slow'
-          fastSlow_dial_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$clockwise == this.hand & data$responseTimeClean < this.med.RT] = 'fast'
-          fastSlow_dial_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$clockwise == this.hand & data$responseTimeClean == this.med.RT] = NaN
-               
-        }
-      }
-    }
-  } 
-}
-
-fastSlow_dial_hand[is.nan(data$responseTimeClean)] = NaN
-
-# Load x moment x dial x location x response hand
-
-med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$targetMoment, data$dialType, data$targetLocation, data$clockwise), FUN = median, na.rm=TRUE)
-fastSlow_dial_tloc_hand = data$responseTimeClean
+med.err.subj = tapply(data$difference, list(data$subjectID, data$loadType, data$targetMoment, data$dialType, data$targetLocation, data$clockwise), FUN = median, na.rm=TRUE)
+precImprec = data$difference
 
 for (sub in 1:length(levels(data$subjectID))){
   for (load in 1:length(levels(data$loadType))){
@@ -342,18 +130,29 @@ for (sub in 1:length(levels(data$subjectID))){
       for (dial in 1:length(levels(data$dialType))){
         for (tloc in 1:length(levels(data$targetLocation))){
           for (hand in 1:length(levels(data$clockwise))){
-            this.med.RT = med.RT1.subj[sub,load,tmom,dial,tloc,hand]
-       
+
+            # Conditions
             this.sub = levels(data$subjectID)[sub]
             this.load = levels(data$loadType)[load]
             this.tmom = levels(data$targetMoment)[tmom]
             this.dial = levels(data$dialType)[dial]
             this.tloc = levels(data$targetLocation)[tloc]
             this.hand = levels(data$clockwise)[hand]
-       
-            fastSlow_dial_tloc_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean > this.med.RT] = 'slow'
-            fastSlow_dial_tloc_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean < this.med.RT] = 'fast'
-            fastSlow_dial_tloc_hand[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean == this.med.RT] = NaN
+            
+            # Fast vs slow
+            this.med.RT = med.RT1.subj[sub,load,tmom,dial,tloc,hand] 
+            
+            fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean > this.med.RT] = 'slow'
+            fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean < this.med.RT] = 'fast'
+            fastSlow[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$responseTimeClean == this.med.RT] = NaN
+            
+            # Prec vs imprec
+            this.med.err = med.err.subj[sub,load,tmom,dial,tloc,hand] 
+
+            precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$difference > this.med.err] = 'prec'
+            precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$difference < this.med.err] = 'imprec'
+            precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$difference == this.med.err] = NaN
+            
           }    
         }
       }
@@ -361,20 +160,13 @@ for (sub in 1:length(levels(data$subjectID))){
   } 
 }
 
-fastSlow_dial_tloc_hand[is.nan(data$responseTimeClean)] = NaN
+fastSlow[is.nan(data$responseTimeClean)] = NaN
 
-# Overlap
-sum(fastSlow == fastSlow_dial)/length(fastSlow)*100
-sum(fastSlow == fastSlow_hand)/length(fastSlow)*100
-sum(fastSlow == fastSlow_reqhand)/length(fastSlow)*100
-
-sum(fastSlow == fastSlow_tloc_hand)/length(fastSlow)*100
-sum(fastSlow == fastSlow_dial_hand)/length(fastSlow)*100
-sum(fastSlow == fastSlow_dial_tloc_hand)/length(fastSlow)*100
-
-data$fastSlow_dial_tloc_hand = fastSlow_dial_tloc_hand
+data$fastSlow = fastSlow
+data$precImprec = precImprec
 
 ```
+
 
 ## Save data
 

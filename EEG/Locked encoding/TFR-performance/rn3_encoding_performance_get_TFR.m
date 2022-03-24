@@ -126,12 +126,6 @@ for this_subject = subjects
     trials_fast             = trials_fast(good_trials);
     trials_slow             = contains(this_sub_log.fastSlow, 'slow');
     trials_slow             = trials_slow(good_trials);
-    
-    % Fast versus slow (including extra variables)
-    trials_fast_xvar             = contains(this_sub_log.fastSlow_dial_tloc_hand, 'fast');
-    trials_fast_xvar             = trials_fast_xvar(good_trials);
-    trials_slow_xvar             = contains(this_sub_log.fastSlow_dial_tloc_hand, 'slow');
-    trials_slow_xvar             = trials_slow_xvar(good_trials);
         
     % Precise versus imprecise
     trials_prec             = contains(this_sub_log.precImprec, 'prec');
@@ -179,45 +173,6 @@ for this_subject = subjects
     trials_load_two_T2_resp_left_slow     = trials_load_two & trials_target_T2 & trials_reqresp_right_abs & trials_slow; % Req resp swaps here, becasue based on T1
     trials_load_two_T2_resp_right_slow    = trials_load_two & trials_target_T2 & trials_reqresp_left_abs & trials_slow;
 
-    %% load x moment x fastvsslow (including extra variables)
-
-    % FAST
-
-    % Load one - T1
-    trials_load_one_T1_resp_left_fast_xvar     = trials_load_one & trials_target_T1 & trials_reqresp_left_abs & trials_fast_xvar;
-    trials_load_one_T1_resp_right_fast_xvar    = trials_load_one & trials_target_T1 & trials_reqresp_right_abs & trials_fast_xvar;
-    
-    % Load one - T2
-    trials_load_one_T2_resp_left_fast_xvar     = trials_load_one & trials_target_T2 & trials_reqresp_left_abs & trials_fast_xvar;
-    trials_load_one_T2_resp_right_fast_xvar    = trials_load_one & trials_target_T2 & trials_reqresp_right_abs & trials_fast_xvar;
-    
-    % Load two - T1
-    trials_load_two_T1_resp_left_fast_xvar     = trials_load_two & trials_target_T1 & trials_reqresp_left_abs & trials_fast_xvar;
-    trials_load_two_T1_resp_right_fast_xvar    = trials_load_two & trials_target_T1 & trials_reqresp_right_abs & trials_fast_xvar;
-    
-    % Load two - T2
-    trials_load_two_T2_resp_left_fast_xvar     = trials_load_two & trials_target_T2 & trials_reqresp_right_abs & trials_fast_xvar; % Req resp swaps here, becasue based on T1
-    trials_load_two_T2_resp_right_fast_xvar    = trials_load_two & trials_target_T2 & trials_reqresp_left_abs & trials_fast_xvar;
-    
-    % SLOW
-    
-    % Load one - T1
-    trials_load_one_T1_resp_left_slow_xvar     = trials_load_one & trials_target_T1 & trials_reqresp_left_abs & trials_slow_xvar;
-    trials_load_one_T1_resp_right_slow_xvar    = trials_load_one & trials_target_T1 & trials_reqresp_right_abs & trials_slow_xvar;
-    
-    % Load one - T2
-    trials_load_one_T2_resp_left_slow_xvar     = trials_load_one & trials_target_T2 & trials_reqresp_left_abs & trials_slow_xvar;
-    trials_load_one_T2_resp_right_slow_xvar    = trials_load_one & trials_target_T2 & trials_reqresp_right_abs & trials_slow_xvar;
-    
-    % Load two - T1
-    trials_load_two_T1_resp_left_slow_xvar     = trials_load_two & trials_target_T1 & trials_reqresp_left_abs & trials_slow_xvar;
-    trials_load_two_T1_resp_right_slow_xvar    = trials_load_two & trials_target_T1 & trials_reqresp_right_abs & trials_slow_xvar;
-    
-    % Load two - T2
-    trials_load_two_T2_resp_left_slow_xvar     = trials_load_two & trials_target_T2 & trials_reqresp_right_abs & trials_slow_xvar; % Req resp swaps here, becasue based on T1
-    trials_load_two_T2_resp_right_slow_xvar    = trials_load_two & trials_target_T2 & trials_reqresp_left_abs & trials_slow_xvar;
-    
-    
     %% load x moment x precvsimprec
 
     % PRECISE
@@ -462,124 +417,6 @@ for this_subject = subjects
 
     motor_load_two_T2_slow(1,:,:) = (cvsi_left + cvsi_right) ./ 2;
 
-    %% CVSI motor: load x moment x fastvsslow (including extra variables)
-    
-    % ---- FAST
-
-    % -- Load one & T1
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_load_one_T1_resp_right_fast_xvar, chan_motor_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_load_one_T1_resp_left_fast_xvar, chan_motor_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_load_one_T1_resp_left_fast_xvar, chan_motor_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_load_one_T1_resp_right_fast_xvar, chan_motor_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    motor_load_one_T1_fast_xvar(1,:,:) = (cvsi_left + cvsi_right) ./ 2;
-   
-    % -- Load one & T2
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_load_one_T2_resp_right_fast_xvar, chan_motor_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_load_one_T2_resp_left_fast_xvar, chan_motor_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_load_one_T2_resp_left_fast_xvar, chan_motor_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_load_one_T2_resp_right_fast_xvar, chan_motor_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    motor_load_one_T2_fast_xvar(1,:,:) = (cvsi_left + cvsi_right) ./ 2;
- 
-    % -- Load two & T1
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_load_two_T1_resp_right_fast_xvar, chan_motor_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_load_two_T1_resp_left_fast_xvar, chan_motor_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_load_two_T1_resp_left_fast_xvar, chan_motor_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_load_two_T1_resp_right_fast_xvar, chan_motor_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    motor_load_two_T1_fast_xvar(1,:,:) = (cvsi_left + cvsi_right) ./ 2;
-   
-    % -- Load two & T2
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_load_two_T2_resp_right_fast_xvar, chan_motor_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_load_two_T2_resp_left_fast_xvar, chan_motor_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_load_two_T2_resp_left_fast_xvar, chan_motor_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_load_two_T2_resp_right_fast_xvar, chan_motor_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    motor_load_two_T2_fast_xvar(1,:,:) = (cvsi_left + cvsi_right) ./ 2;
- 
-    % ---- SLOW
-
-    % -- Load one & T1
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_load_one_T1_resp_right_slow_xvar, chan_motor_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_load_one_T1_resp_left_slow_xvar, chan_motor_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_load_one_T1_resp_left_slow_xvar, chan_motor_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_load_one_T1_resp_right_slow_xvar, chan_motor_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    motor_load_one_T1_slow_xvar(1,:,:) = (cvsi_left + cvsi_right) ./ 2;
-   
-    % -- Load one & T2
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_load_one_T2_resp_right_slow_xvar, chan_motor_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_load_one_T2_resp_left_slow_xvar, chan_motor_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_load_one_T2_resp_left_slow_xvar, chan_motor_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_load_one_T2_resp_right_slow_xvar, chan_motor_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    motor_load_one_T2_slow_xvar(1,:,:) = (cvsi_left + cvsi_right) ./ 2;
- 
-    % -- Load two & T1
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_load_two_T1_resp_right_slow_xvar, chan_motor_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_load_two_T1_resp_left_slow_xvar, chan_motor_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_load_two_T1_resp_left_slow_xvar, chan_motor_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_load_two_T1_resp_right_slow_xvar, chan_motor_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    motor_load_two_T1_slow_xvar(1,:,:) = (cvsi_left + cvsi_right) ./ 2;
-   
-    % -- Load two & T2
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_load_two_T2_resp_right_slow_xvar, chan_motor_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_load_two_T2_resp_left_slow_xvar, chan_motor_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_load_two_T2_resp_left_slow_xvar, chan_motor_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_load_two_T2_resp_right_slow_xvar, chan_motor_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    motor_load_two_T2_slow_xvar(1,:,:) = (cvsi_left + cvsi_right) ./ 2;    
-    
     %% CVSI motor: load x moment x precvsimprec
     
     % ---- PRECISE
@@ -957,19 +794,7 @@ for this_subject = subjects
     cvsi_perf.motor_load_one_T2_slow     = motor_load_one_T2_slow;
     cvsi_perf.motor_load_two_T1_slow     = motor_load_two_T1_slow;
     cvsi_perf.motor_load_two_T2_slow     = motor_load_two_T2_slow;   
-    
-    % Fast (xvar)
-    cvsi_perf.motor_load_one_T1_fast_xvar     = motor_load_one_T1_fast_xvar;
-    cvsi_perf.motor_load_one_T2_fast_xvar     = motor_load_one_T2_fast_xvar;
-    cvsi_perf.motor_load_two_T1_fast_xvar     = motor_load_two_T1_fast_xvar;
-    cvsi_perf.motor_load_two_T2_fast_xvar     = motor_load_two_T2_fast_xvar;     
-    
-    % Slow (xvar)
-    cvsi_perf.motor_load_one_T1_slow_xvar     = motor_load_one_T1_slow_xvar;
-    cvsi_perf.motor_load_one_T2_slow_xvar     = motor_load_one_T2_slow_xvar;
-    cvsi_perf.motor_load_two_T1_slow_xvar     = motor_load_two_T1_slow_xvar;
-    cvsi_perf.motor_load_two_T2_slow_xvar     = motor_load_two_T2_slow_xvar;     
-    
+
     % Precise
     cvsi_perf.motor_load_one_T1_prec     = motor_load_one_T1_prec;
     cvsi_perf.motor_load_one_T2_prec     = motor_load_one_T2_prec;

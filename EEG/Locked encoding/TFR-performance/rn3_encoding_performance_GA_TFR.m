@@ -1,4 +1,4 @@
-%% Clear workspace
+ %% Clear workspace
 clc; clear; close all
 
 %% Define parameters
@@ -27,23 +27,23 @@ for this_subject = subjects
     
     % Fast, slow, fast-slow
     
-    % Load 1 (including extra variables)
-    cvsi_perf_all.motor_load_one_T1_fast(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T1_fast_xvar;
-    cvsi_perf_all.motor_load_one_T2_fast(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T2_fast_xvar;
-    cvsi_perf_all.motor_load_one_T1_slow(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T1_slow_xvar;
-    cvsi_perf_all.motor_load_one_T2_slow(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T2_slow_xvar;    
+    % Load 1
+    cvsi_perf_all.motor_load_one_T1_fast(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T1_fast;
+    cvsi_perf_all.motor_load_one_T2_fast(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T2_fast;
+    cvsi_perf_all.motor_load_one_T1_slow(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T1_slow;
+    cvsi_perf_all.motor_load_one_T2_slow(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T2_slow;    
     
-    cvsi_perf_all.motor_load_one_T1_fast_slow(this_subject,:,:,:)   = cvsi_perf.motor_load_one_T1_fast_xvar - cvsi_perf.motor_load_one_T1_slow_xvar;
-    cvsi_perf_all.motor_load_one_T2_fast_slow(this_subject,:,:,:)   = cvsi_perf.motor_load_one_T2_fast_xvar - cvsi_perf.motor_load_one_T2_slow_xvar;
+    cvsi_perf_all.motor_load_one_T1_fast_slow(this_subject,:,:,:)   = cvsi_perf.motor_load_one_T1_fast - cvsi_perf.motor_load_one_T1_slow;
+    cvsi_perf_all.motor_load_one_T2_fast_slow(this_subject,:,:,:)   = cvsi_perf.motor_load_one_T2_fast - cvsi_perf.motor_load_one_T2_slow;
     
-    % Load 2 (including extra variables)
-    cvsi_perf_all.motor_load_two_T1_fast(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T1_fast_xvar;
-    cvsi_perf_all.motor_load_two_T2_fast(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T2_fast_xvar;
-    cvsi_perf_all.motor_load_two_T1_slow(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T1_slow_xvar;
-    cvsi_perf_all.motor_load_two_T2_slow(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T2_slow_xvar;
+    % Load 2
+    cvsi_perf_all.motor_load_two_T1_fast(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T1_fast;
+    cvsi_perf_all.motor_load_two_T2_fast(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T2_fast;
+    cvsi_perf_all.motor_load_two_T1_slow(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T1_slow;
+    cvsi_perf_all.motor_load_two_T2_slow(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T2_slow;
     
-    cvsi_perf_all.motor_load_two_T1_fast_slow(this_subject,:,:,:)   = cvsi_perf.motor_load_two_T1_fast_xvar - cvsi_perf.motor_load_two_T1_slow_xvar;
-    cvsi_perf_all.motor_load_two_T2_fast_slow(this_subject,:,:,:)   = cvsi_perf.motor_load_two_T2_fast_xvar - cvsi_perf.motor_load_two_T2_slow_xvar;
+    cvsi_perf_all.motor_load_two_T1_fast_slow(this_subject,:,:,:)   = cvsi_perf.motor_load_two_T1_fast - cvsi_perf.motor_load_two_T1_slow;
+    cvsi_perf_all.motor_load_two_T2_fast_slow(this_subject,:,:,:)   = cvsi_perf.motor_load_two_T2_fast - cvsi_perf.motor_load_two_T2_slow;
 
 end  
 
