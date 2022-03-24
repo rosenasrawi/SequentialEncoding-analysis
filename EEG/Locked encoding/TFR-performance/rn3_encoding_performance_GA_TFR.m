@@ -25,7 +25,7 @@ for this_subject = subjects
 
     % MOTOR
     
-    % Fast, slow, fast-slow
+    % Fast, slow
     
     % Load 1
     cvsi_perf_all.motor_load_one_T1_fast(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T1_fast;
@@ -33,18 +33,26 @@ for this_subject = subjects
     cvsi_perf_all.motor_load_one_T1_slow(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T1_slow;
     cvsi_perf_all.motor_load_one_T2_slow(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T2_slow;    
     
-    cvsi_perf_all.motor_load_one_T1_fast_slow(this_subject,:,:,:)   = cvsi_perf.motor_load_one_T1_fast - cvsi_perf.motor_load_one_T1_slow;
-    cvsi_perf_all.motor_load_one_T2_fast_slow(this_subject,:,:,:)   = cvsi_perf.motor_load_one_T2_fast - cvsi_perf.motor_load_one_T2_slow;
-    
     % Load 2
     cvsi_perf_all.motor_load_two_T1_fast(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T1_fast;
     cvsi_perf_all.motor_load_two_T2_fast(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T2_fast;
     cvsi_perf_all.motor_load_two_T1_slow(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T1_slow;
     cvsi_perf_all.motor_load_two_T2_slow(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T2_slow;
     
-    cvsi_perf_all.motor_load_two_T1_fast_slow(this_subject,:,:,:)   = cvsi_perf.motor_load_two_T1_fast - cvsi_perf.motor_load_two_T1_slow;
-    cvsi_perf_all.motor_load_two_T2_fast_slow(this_subject,:,:,:)   = cvsi_perf.motor_load_two_T2_fast - cvsi_perf.motor_load_two_T2_slow;
-
+    % Precise, imprecise
+    
+    % Load 2
+    cvsi_perf_all.motor_load_one_T1_prec(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T1_prec;
+    cvsi_perf_all.motor_load_one_T2_prec(this_subject,:,:,:)        = cvsi_perf.motor_load_one_T2_prec;
+    cvsi_perf_all.motor_load_one_T1_imprec(this_subject,:,:,:)      = cvsi_perf.motor_load_one_T1_imprec;
+    cvsi_perf_all.motor_load_one_T2_imprec(this_subject,:,:,:)      = cvsi_perf.motor_load_one_T2_imprec;    
+    
+    % Load 2
+    cvsi_perf_all.motor_load_two_T1_prec(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T1_prec;
+    cvsi_perf_all.motor_load_two_T2_prec(this_subject,:,:,:)        = cvsi_perf.motor_load_two_T2_prec;
+    cvsi_perf_all.motor_load_two_T1_imprec(this_subject,:,:,:)      = cvsi_perf.motor_load_two_T1_imprec;
+    cvsi_perf_all.motor_load_two_T2_imprec(this_subject,:,:,:)      = cvsi_perf.motor_load_two_T2_imprec;    
+    
 end  
 
 mean_cvsi_perf_all = selectfields(cvsi_perf_all,{'label', 'time', 'freq', 'dimord'});
@@ -52,7 +60,7 @@ mean_cvsi_perf_all.label = {'C3'};
 
 % MOTOR
 
-% Fast, slow, fast-slow
+% Fast, slow
 
 % Load 1
 mean_cvsi_perf_all.motor_load_one_T1_fast           = reshape(squeeze(mean(cvsi_perf_all.motor_load_one_T1_fast)), 1,38,94);
@@ -60,17 +68,25 @@ mean_cvsi_perf_all.motor_load_one_T2_fast           = reshape(squeeze(mean(cvsi_
 mean_cvsi_perf_all.motor_load_one_T1_slow           = reshape(squeeze(mean(cvsi_perf_all.motor_load_one_T1_slow)), 1,38,94);
 mean_cvsi_perf_all.motor_load_one_T2_slow           = reshape(squeeze(mean(cvsi_perf_all.motor_load_one_T2_slow)), 1,38,94);
 
-mean_cvsi_perf_all.motor_load_one_T1_fast_slow      = reshape(squeeze(mean(cvsi_perf_all.motor_load_one_T1_fast_slow)), 1,38,94);
-mean_cvsi_perf_all.motor_load_one_T2_fast_slow      = reshape(squeeze(mean(cvsi_perf_all.motor_load_one_T2_fast_slow)), 1,38,94);
-
 % Load 2
 mean_cvsi_perf_all.motor_load_two_T1_fast           = reshape(squeeze(mean(cvsi_perf_all.motor_load_two_T1_fast)), 1,38,94);
 mean_cvsi_perf_all.motor_load_two_T2_fast           = reshape(squeeze(mean(cvsi_perf_all.motor_load_two_T2_fast)), 1,38,94);
 mean_cvsi_perf_all.motor_load_two_T1_slow           = reshape(squeeze(mean(cvsi_perf_all.motor_load_two_T1_slow)), 1,38,94);
 mean_cvsi_perf_all.motor_load_two_T2_slow           = reshape(squeeze(mean(cvsi_perf_all.motor_load_two_T2_slow)), 1,38,94);
 
-mean_cvsi_perf_all.motor_load_two_T1_fast_slow      = reshape(squeeze(mean(cvsi_perf_all.motor_load_two_T1_fast_slow)), 1,38,94);
-mean_cvsi_perf_all.motor_load_two_T2_fast_slow      = reshape(squeeze(mean(cvsi_perf_all.motor_load_two_T2_fast_slow)), 1,38,94);
+% Precise, imprecise
+
+% Load 1
+mean_cvsi_perf_all.motor_load_one_T1_prec           = reshape(squeeze(mean(cvsi_perf_all.motor_load_one_T1_prec)), 1,38,94);
+mean_cvsi_perf_all.motor_load_one_T2_prec           = reshape(squeeze(mean(cvsi_perf_all.motor_load_one_T2_prec)), 1,38,94);
+mean_cvsi_perf_all.motor_load_one_T1_imprec         = reshape(squeeze(mean(cvsi_perf_all.motor_load_one_T1_imprec)), 1,38,94);
+mean_cvsi_perf_all.motor_load_one_T2_imprec         = reshape(squeeze(mean(cvsi_perf_all.motor_load_one_T2_imprec)), 1,38,94);
+
+% Load 2
+mean_cvsi_perf_all.motor_load_two_T1_prec           = reshape(squeeze(mean(cvsi_perf_all.motor_load_two_T1_prec)), 1,38,94);
+mean_cvsi_perf_all.motor_load_two_T2_prec           = reshape(squeeze(mean(cvsi_perf_all.motor_load_two_T2_prec)), 1,38,94);
+mean_cvsi_perf_all.motor_load_two_T1_imprec         = reshape(squeeze(mean(cvsi_perf_all.motor_load_two_T1_imprec)), 1,38,94);
+mean_cvsi_perf_all.motor_load_two_T2_imprec         = reshape(squeeze(mean(cvsi_perf_all.motor_load_two_T2_imprec)), 1,38,94);
 
 %% Stat parameters
 

@@ -30,8 +30,6 @@ stat_perf_encoding.motor_beta_load_two_T1_fast          = frevede_ftclusterstat1
 stat_perf_encoding.motor_beta_load_two_T2_fast          = frevede_ftclusterstat1D(statcfg, cvsi_motor_beta{2}, data_zero);
 stat_perf_encoding.motor_beta_load_two_T1_slow          = frevede_ftclusterstat1D(statcfg, cvsi_motor_beta{3}, data_zero);
 stat_perf_encoding.motor_beta_load_two_T2_slow          = frevede_ftclusterstat1D(statcfg, cvsi_motor_beta{4}, data_zero);
-stat_perf_encoding.motor_beta_load_two_T1_fast_slow     = frevede_ftclusterstat1D(statcfg, cvsi_motor_beta{5}, data_zero);
-stat_perf_encoding.motor_beta_load_two_T2_fast_slow     = frevede_ftclusterstat1D(statcfg, cvsi_motor_beta{6}, data_zero);
 
 %% Define structure for statistics (2D)
 
@@ -52,8 +50,6 @@ stat_perf_encoding.motor_load_two_T1_fast       = frevede_ftclusterstat2D(statcf
 stat_perf_encoding.motor_load_two_T2_fast       = frevede_ftclusterstat2D(statcfg, cvsi_motor{2}, data_zero);
 stat_perf_encoding.motor_load_two_T1_slow       = frevede_ftclusterstat2D(statcfg, cvsi_motor{3}, data_zero);
 stat_perf_encoding.motor_load_two_T2_slow       = frevede_ftclusterstat2D(statcfg, cvsi_motor{4}, data_zero);
-stat_perf_encoding.motor_load_two_T1_fast_slow  = frevede_ftclusterstat2D(statcfg, cvsi_motor{5}, data_zero);
-stat_perf_encoding.motor_load_two_T2_fast_slow  = frevede_ftclusterstat2D(statcfg, cvsi_motor{6}, data_zero);
 
 %% Save
 
