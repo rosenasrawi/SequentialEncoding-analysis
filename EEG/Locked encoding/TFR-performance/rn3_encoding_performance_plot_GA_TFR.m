@@ -49,11 +49,11 @@ for contrast = 1:length(perf_contrasts)
     
     cfg.parameter       = perf_contrasts{contrast};
     
-%     if contrast == 1
-%         cfg.maskparameter = 'mask_motor_load_two_T1_fast';
-%     else
-%         cfg.maskparameter = '';
-%     end    
+    if contrast == 1
+        cfg.maskparameter = 'mask_motor_load_two_T1_fast';
+    else
+        cfg.maskparameter = '';
+    end    
     
     ft_singleplotTFR(cfg, mean_cvsi_perf_all);
     colormap(flipud(brewermap(100,'RdBu')));  
