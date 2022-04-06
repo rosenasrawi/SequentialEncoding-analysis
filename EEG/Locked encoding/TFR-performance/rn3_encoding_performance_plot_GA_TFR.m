@@ -88,6 +88,7 @@ for contrast = 1:length(perf_contrasts)
     title(titles_perf_contrasts{contrast})
 end
 
+
 %% ----------- Time-courses -----------
 
 %% Motor beta (from cluster)
@@ -107,10 +108,11 @@ for i = 1:length(titles_perf_contrasts_L1)
     frevede_errorbarplot(mean_cvsi_perf_all.time, cvsi_motor_beta_slow{i}, [80/255, 172/255, 123/255], 'se');
 
     xline(0); xline(1); xline(3); yline(0)
-    xlim([-0.5 3.5]); ylim([-10 10])
+    xlim([-0.5 3.5]); ylim([-12 12])
     title(titles_perf_contrasts_L1{i})
 
 end
+
 
 %% Fast, slow; Load 2
 

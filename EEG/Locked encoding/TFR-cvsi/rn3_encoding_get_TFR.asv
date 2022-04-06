@@ -485,6 +485,8 @@ for this_subject = subjects
     
     %% Right vs left response (topography)
 
+    % ---- Both dials
+
     % -- Load one & T1
     
     a = mean(tfr.powspctrm(trials_load_one_target_T1_reqresp_right, :, :, :)); % right
@@ -503,26 +505,6 @@ for this_subject = subjects
     b = mean(tfr.powspctrm(trials_load_two_reqresp_left, :, :, :)); % left
     rvsl_resp_load_two = squeeze(((a-b) ./ (a+b)) * 100);
     
-    %% Right vs left item location (topography)
-    
-    % -- Load one & T1
-    
-    a = mean(tfr.powspctrm(trials_load_one_target_T1_item_right, :, :, :)); % right
-    b = mean(tfr.powspctrm(trials_load_one_target_T1_item_left, :, :, :)); % left
-    rvsl_item_load_one_T1 = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % -- Load one & T2
-    
-    a = mean(tfr.powspctrm(trials_load_one_target_T2_item_right, :, :, :)); % right
-    b = mean(tfr.powspctrm(trials_load_one_target_T2_item_left, :, :, :)); % left
-    rvsl_item_load_one_T2 = squeeze(((a-b) ./ (a+b)) * 100);
-    
-    % -- Load two
-    
-    a = mean(tfr.powspctrm(trials_load_two_item_right, :, :, :)); % right
-    b = mean(tfr.powspctrm(trials_load_two_item_left, :, :, :)); % left
-    rvsl_item_load_two = squeeze(((a-b) ./ (a+b)) * 100);
-        
     %% Contrast parameters in structure
 
     cvsi_encoding = [];
@@ -533,49 +515,36 @@ for this_subject = subjects
     cvsi_encoding.dimord = 'chan_freq_time';
     
     % Motor
+    % - Both dials
     
-    % --- Both dials
-    cvsi_encoding.cvsi_motor_load_one_T1              = cvsi_motor_load_one_T1;
-    cvsi_encoding.cvsi_motor_load_one_T2              = cvsi_motor_load_one_T2;
-    cvsi_encoding.cvsi_motor_load_two                 = cvsi_motor_load_two;    
+    % - Dial up
     
-    % - right vs left (topo)
-    cvsi_encoding.rvsl_resp_load_one_T1               = rvsl_resp_load_one_T1;
-    cvsi_encoding.rvsl_resp_load_one_T2               = rvsl_resp_load_one_T2;
-    cvsi_encoding.rvsl_resp_load_two                  = rvsl_resp_load_two;
-    
-    % --- Dial up
+    % - Dial right
     cvsi_encoding.cvsi_motor_load_one_T1_dial_up      = cvsi_motor_load_one_T1_dial_up;
     cvsi_encoding.cvsi_motor_load_one_T2_dial_up      = cvsi_motor_load_one_T2_dial_up;
     cvsi_encoding.cvsi_motor_load_two_dial_up         = cvsi_motor_load_two_dial_up;
-    
-    % --- Dial right
     cvsi_encoding.cvsi_motor_load_one_T1_dial_right   = cvsi_motor_load_one_T1_dial_right;
     cvsi_encoding.cvsi_motor_load_one_T2_dial_right   = cvsi_motor_load_one_T2_dial_right;
     cvsi_encoding.cvsi_motor_load_two_dial_right      = cvsi_motor_load_two_dial_right;
-    
-    % Visual
+    cvsi_encoding.cvsi_motor_load_one_T1              = cvsi_motor_load_one_T1;
+    cvsi_encoding.cvsi_motor_load_one_T2              = cvsi_motor_load_one_T2;
+    cvsi_encoding.cvsi_motor_load_two                 = cvsi_motor_load_two;    
 
-    % --- Both dials
-    cvsi_encoding.cvsi_visual_load_one_T1             = cvsi_visual_load_one_T1;
-    cvsi_encoding.cvsi_visual_load_one_T2             = cvsi_visual_load_one_T2;
-    cvsi_encoding.cvsi_visual_load_two                = cvsi_visual_load_two;  
+    cvsi_encoding.cvsi_visual_load_one_T1_dial_up      = cvsi_visual_load_one_T1_dial_up;
+    cvsi_encoding.cvsi_visual_load_one_T2_dial_up      = cvsi_visual_load_one_T2_dial_up;
+    cvsi_encoding.cvsi_visual_load_two_dial_up         = cvsi_visual_load_two_dial_up;
+    cvsi_encoding.cvsi_visual_load_one_T1_dial_right   = cvsi_visual_load_one_T1_dial_right;
+    cvsi_encoding.cvsi_visual_load_one_T2_dial_right   = cvsi_visual_load_one_T2_dial_right;
+    cvsi_encoding.cvsi_visual_load_two_dial_right      = cvsi_visual_load_two_dial_right;
+    cvsi_encoding.cvsi_visual_load_one_T1              = cvsi_visual_load_one_T1;
+    cvsi_encoding.cvsi_visual_load_one_T2              = cvsi_visual_load_one_T2;
+    cvsi_encoding.cvsi_visual_load_two                 = cvsi_visual_load_two;   
     
-    % - right vs left (topo)
-    cvsi_encoding.rvsl_item_load_one_T1               = rvsl_item_load_one_T1;
-    cvsi_encoding.rvsl_item_load_one_T2               = rvsl_item_load_one_T2;
-    cvsi_encoding.rvsl_item_load_two                  = rvsl_item_load_two;
-    
-    % --- Dial up
-    cvsi_encoding.cvsi_visual_load_one_T1_dial_up     = cvsi_visual_load_one_T1_dial_up;
-    cvsi_encoding.cvsi_visual_load_one_T2_dial_up     = cvsi_visual_load_one_T2_dial_up;
-    cvsi_encoding.cvsi_visual_load_two_dial_up        = cvsi_visual_load_two_dial_up;
-    
-    % --- Dial right
-    cvsi_encoding.cvsi_visual_load_one_T1_dial_right  = cvsi_visual_load_one_T1_dial_right;
-    cvsi_encoding.cvsi_visual_load_one_T2_dial_right  = cvsi_visual_load_one_T2_dial_right;
-    cvsi_encoding.cvsi_visual_load_two_dial_right     = cvsi_visual_load_two_dial_right;
+    cvsi_encoding.rvsl_resp_load_one_T1                = rvsl_resp_load_one_T1;
+    cvsi_encoding.rvsl_resp_load_one_T2                = rvsl_resp_load_one_T2;
+    cvsi_encoding.rvsl_resp_load_two                   = rvsl_resp_load_two;
  
+    
     %% Save 
     
     save([param.path, 'Processed/EEG/Locked encoding/tfr contrasts encoding/' 'cvsi_encoding_' param.subjectIDs{this_subject}], 'cvsi_encoding');
