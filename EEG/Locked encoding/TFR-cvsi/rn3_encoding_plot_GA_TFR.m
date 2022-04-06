@@ -16,7 +16,7 @@ masked = true;
 
 %% both dials
 
-titles_enc_contrasts = {'cvsi motor - load1-T1', 'cvsi motor - load1-T2', 'cvsi motor - load2'};
+titles_enc_contrasts = {'load one - T1', 'load one - T2', 'load two'};
 enc_contrasts = {'cvsi_motor_load_one_T1', 'cvsi_motor_load_one_T2', 'cvsi_motor_load_two'};
 enc_masks = {'mask_motor_load_one_T1', 'mask_motor_load_one_T2', 'mask_motor_load_two'};
 
@@ -160,7 +160,7 @@ T2_enc_index    = cvsi_encoding_all.time >= param.T2_enc(1) & cvsi_encoding_all.
 
 %% General params
 
-beta_index              = cvsi_encoding_all.freq >= param.betaband(1) & cvsi_encoding_all.freq <= param.betaband(2);
+beta_index              = cvsi_encoding_all.freq >= 8 & cvsi_encoding_all.freq <= 30;
 alpha_index             = cvsi_encoding_all.freq >= param.alphaband(1) & cvsi_encoding_all.freq <= param.alphaband(2);
 alpha_mu_beta_index     = cvsi_encoding_all.freq >= param.alphaband(1) & cvsi_encoding_all.freq <= param.betaband(2);
 
@@ -288,10 +288,10 @@ end
 
 %% full time
 cvsi_motor_alpha_mu_beta = {squeeze(mean(squeeze(cvsi_encoding_all.cvsi_motor_load_one_T1(:,:,alpha_mu_beta_index,:)),2)), squeeze(mean(squeeze(cvsi_encoding_all.cvsi_motor_load_one_T2(:,:,alpha_mu_beta_index,:)),2)), squeeze(mean(squeeze(cvsi_encoding_all.cvsi_motor_load_two(:,:,alpha_mu_beta_index,:)),2))};
-linecolors = {'blue','red','black'};
+linecolors = {'black','black','black'};
 
 figure; sgtitle("motor 8-30 Hz")
-
+ylims = {[-10,10],[-10,10],[-5,5]};
 for i = 1:length(timecourse_titles)
     
     subplot(1,3,i)
@@ -299,7 +299,7 @@ for i = 1:length(timecourse_titles)
     plot(mean_cvsi_encoding_all.time, stat_motor_alpha_mu_beta{i} * -0.3, 'k', 'LineWidth', 2);
 
     xline(0); xline(1); xline(3); yline(0)
-    xlim([-0.5 3.5]); ylim([-10 10])
+    xlim([-0.5 3.5]); ylim(ylims{i})
     title(timecourse_titles{i})
 
 end
