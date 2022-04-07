@@ -103,7 +103,7 @@ data$targetMoment = as.factor(data$targetMoment)
 levels(data$targetMoment) = c("Early", "Late")
 
 data$dialType = as.factor(data$dialType)
-levels(data$dialType) = c("Up", "Right")
+levels(data$dialType) = c("Vertical", "Horizontal")
 
 data$targetLocation = as.factor(data$targetLocation)
 
@@ -349,7 +349,7 @@ ggplot(summary.rt.load.moment.dial,
   scale_y_continuous("Decision time (s)") +
   scale_x_discrete("Memory load") +
 
-  coord_cartesian(ylim = c(0.1,1.5)) +
+  coord_cartesian(ylim = c(0.1,1)) +
 
   theme_bw() +
   text.theme +
@@ -387,4 +387,18 @@ ggplot(summary.err.load.moment.dial,
   text.theme +
   legend.theme
 
+```
+
+# ANOVA: load x moment x dial
+
+### Absolute error
+```{r stat error}
+anov_Err <- aov(difference ~ loadType * targetMoment * dialType, data = summary.err.subj.load.moment.dial)
+summary(anov_Err)
+```
+
+### Decision time
+```{r stat dt}
+anov_RT <- aov(responseTimeClean ~ loadType * targetMoment * dialType, data = summary.rt.subj.load.moment.dial)
+summary(anov_RT)
 ```
