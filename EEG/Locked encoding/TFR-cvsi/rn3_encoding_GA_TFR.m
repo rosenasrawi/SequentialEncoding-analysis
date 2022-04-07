@@ -34,6 +34,10 @@ for this_subject = subjects
     cvsi_encoding_all.cvsi_motor_load_one_T2(this_subject,:,:,:)                = cvsi_encoding.cvsi_motor_load_one_T2;
     cvsi_encoding_all.cvsi_motor_load_two(this_subject,:,:,:)                   = cvsi_encoding.cvsi_motor_load_two;
     
+    cvsi_encoding_all.rvsl_resp_load_one_T1(this_subject,:,:,:)                 = cvsi_encoding.rvsl_resp_load_one_T1;
+    cvsi_encoding_all.rvsl_resp_load_one_T2(this_subject,:,:,:)                 = cvsi_encoding.rvsl_resp_load_one_T2;
+    cvsi_encoding_all.rvsl_resp_load_two(this_subject,:,:,:)                    = cvsi_encoding.rvsl_resp_load_two;
+    
     cvsi_encoding_all.cvsi_visual_load_one_T1_dial_up(this_subject,:,:,:)       = cvsi_encoding.cvsi_visual_load_one_T1_dial_up;
     cvsi_encoding_all.cvsi_visual_load_one_T2_dial_up(this_subject,:,:,:)       = cvsi_encoding.cvsi_visual_load_one_T2_dial_up;
     cvsi_encoding_all.cvsi_visual_load_two_dial_up(this_subject,:,:,:)          = cvsi_encoding.cvsi_visual_load_two_dial_up;
@@ -44,6 +48,9 @@ for this_subject = subjects
     cvsi_encoding_all.cvsi_visual_load_one_T2(this_subject,:,:,:)               = cvsi_encoding.cvsi_visual_load_one_T2;
     cvsi_encoding_all.cvsi_visual_load_two(this_subject,:,:,:)                  = cvsi_encoding.cvsi_visual_load_two;
 
+    cvsi_encoding_all.rvsl_item_load_one_T1(this_subject,:,:,:)                 = cvsi_encoding.rvsl_item_load_one_T1;
+    cvsi_encoding_all.rvsl_item_load_one_T2(this_subject,:,:,:)                 = cvsi_encoding.rvsl_item_load_one_T2;
+    cvsi_encoding_all.rvsl_item_load_two(this_subject,:,:,:)                    = cvsi_encoding.rvsl_item_load_two;
 end  
     
 %% Average
@@ -61,6 +68,10 @@ mean_cvsi_encoding_all.cvsi_motor_load_one_T1                = reshape(squeeze(m
 mean_cvsi_encoding_all.cvsi_motor_load_one_T2                = reshape(squeeze(mean(cvsi_encoding_all.cvsi_motor_load_one_T2)), 1,38,94);
 mean_cvsi_encoding_all.cvsi_motor_load_two                   = reshape(squeeze(mean(cvsi_encoding_all.cvsi_motor_load_two)), 1,38,94);
 
+mean_cvsi_encoding_all.rvsl_resp_load_one_T1                 = squeeze(mean(cvsi_encoding_all.rvsl_resp_load_one_T1));
+mean_cvsi_encoding_all.rvsl_resp_load_one_T2                 = squeeze(mean(cvsi_encoding_all.rvsl_resp_load_one_T2));
+mean_cvsi_encoding_all.rvsl_resp_load_two                    = squeeze(mean(cvsi_encoding_all.rvsl_resp_load_two));
+
 mean_cvsi_encoding_all.cvsi_visual_load_one_T1_dial_up       = reshape(squeeze(mean(cvsi_encoding_all.cvsi_visual_load_one_T1_dial_up)), 1,38,94);
 mean_cvsi_encoding_all.cvsi_visual_load_one_T2_dial_up       = reshape(squeeze(mean(cvsi_encoding_all.cvsi_visual_load_one_T2_dial_up)), 1,38,94);
 mean_cvsi_encoding_all.cvsi_visual_load_two_dial_up          = reshape(squeeze(mean(cvsi_encoding_all.cvsi_visual_load_two_dial_up)), 1,38,94);
@@ -70,6 +81,10 @@ mean_cvsi_encoding_all.cvsi_visual_load_two_dial_right       = reshape(squeeze(m
 mean_cvsi_encoding_all.cvsi_visual_load_one_T1               = reshape(squeeze(mean(cvsi_encoding_all.cvsi_visual_load_one_T1)), 1,38,94);
 mean_cvsi_encoding_all.cvsi_visual_load_one_T2               = reshape(squeeze(mean(cvsi_encoding_all.cvsi_visual_load_one_T2)), 1,38,94);
 mean_cvsi_encoding_all.cvsi_visual_load_two                  = reshape(squeeze(mean(cvsi_encoding_all.cvsi_visual_load_two)), 1,38,94);
+
+mean_cvsi_encoding_all.rvsl_item_load_one_T1                 = squeeze(mean(cvsi_encoding_all.rvsl_item_load_one_T1));
+mean_cvsi_encoding_all.rvsl_item_load_one_T2                 = squeeze(mean(cvsi_encoding_all.rvsl_item_load_one_T2));
+mean_cvsi_encoding_all.rvsl_item_load_two                    = squeeze(mean(cvsi_encoding_all.rvsl_item_load_two));
 
 %% Stat parameters
 

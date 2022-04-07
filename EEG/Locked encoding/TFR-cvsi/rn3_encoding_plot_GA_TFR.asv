@@ -109,9 +109,9 @@ end
 %% full time
 cvsi_motor_beta = {squeeze(mean(squeeze(cvsi_encoding_all.cvsi_motor_load_one_T1(:,:,beta_index,:)),2)), squeeze(mean(squeeze(cvsi_encoding_all.cvsi_motor_load_one_T2(:,:,beta_index,:)),2)), squeeze(mean(squeeze(cvsi_encoding_all.cvsi_motor_load_two(:,:,beta_index,:)),2))};
 
-linecolors = {[140/255, 69/255, 172/255],[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
+linecolors = {'black','black','black'};
 ylims = {[-10,10],[-10,10],[-5,5]};
-figure; %sgtitle("motor 13-30 Hz")
+figure; sgtitle("motor 13-30 Hz")
 
 for i = 1:length(timecourse_titles)
     
@@ -130,16 +130,16 @@ end
 cvsi_motor_beta_postenc = {(cvsi_motor_beta{1}(:,T1_index) + cvsi_motor_beta{2}(:,T2_index)) / 2, cvsi_motor_beta{3}(:,T1_index)};
 
 postenc_titles = {'load one', 'load two'};
-linecolors = {[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
+linecolors = {'blue','black'};
 
-figure;
+figure; sgtitle("motor 13-30 Hz: encoding response")
 
 frevede_errorbarplot(mean_cvsi_encoding_all.time(T1_index), cvsi_motor_beta_postenc{1}, linecolors{1}, 'se');
 hold on 
 frevede_errorbarplot(mean_cvsi_encoding_all.time(T1_index), cvsi_motor_beta_postenc{2}, linecolors{2}, 'se');
 
 xline(0); xline(1); yline(0)
-xlim([0 1.2]); ylim([-5 5])
+xlim([0 2]); ylim([-5 5])
 
 % %% post-encoding bargraph
 % 
@@ -189,20 +189,19 @@ end
 %% using time-course clusters
 
 % Eye-balling clusters
-% [cvsi_encoding_all.time;stat_motor_beta{1}]
-% [cvsi_encoding_all.time;stat_motor_beta{2}]
-% [cvsi_encoding_all.time;stat_motor_beta{3}]
+[cvsi_encoding_all.time;stat_motor_beta{1}]
+[cvsi_encoding_all.time;stat_motor_beta{2}]
+[cvsi_encoding_all.time;stat_motor_beta{3}]
 
 mean_cvsi_encoding_all.label = complete_label;
 
 topo_contrasts = {'rvsl_resp_load_one_T1','rvsl_resp_load_one_T2','rvsl_resp_load_two'};
 time_select = {{[0.7 1], [2.15 3]}, {[1.5 1.7], [2.2 3]}, {[0.6 0.8], [2 3]}};
-time_titles = {'post-encoding','pre-probe'};
+time_ti
 
 for contrast = 1:length(topo_contrasts)  
     
     figure;
-    sgtitle(titles_enc_contrasts{contrast});
     
     cfg = [];
 
@@ -221,8 +220,8 @@ for contrast = 1:length(topo_contrasts)
         ft_topoplotTFR(cfg, mean_cvsi_encoding_all);
         colormap(flipud(brewermap(100,'RdBu')));
     
-        title(time_titles{time}, 'FontSize', 14,  'FontWeight', 'normal', 'Position', [0, -1, 0]);
-    end
+        title(titles_enc_contrasts{contrast}, 'FontSize', 14,  'FontWeight', 'normal', 'Position', [0, -1, 0]);
+
 end
 
 
