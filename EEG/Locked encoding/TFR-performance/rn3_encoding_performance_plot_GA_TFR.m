@@ -119,17 +119,16 @@ end
 cvsi_motor_beta_fast    = {squeeze(mean(squeeze(cvsi_perf_all.motor_load_two_T1_fast(:,:,clust_freq_index,:)),2)), squeeze(mean(squeeze(cvsi_perf_all.motor_load_two_T2_fast(:,:,clust_freq_index,:)),2))};
 cvsi_motor_beta_slow    = {squeeze(mean(squeeze(cvsi_perf_all.motor_load_two_T1_slow(:,:,clust_freq_index,:)),2)), squeeze(mean(squeeze(cvsi_perf_all.motor_load_two_T2_slow(:,:,clust_freq_index,:)),2))};
 
-figure; sgtitle("motor beta: fast v slow")
-
+figure;
 for i = 1:length(titles_perf_contrasts)
 
     subplot(1,2,i)
-    frevede_errorbarplot(mean_cvsi_perf_all.time, cvsi_motor_beta_fast{i}, [140/255, 69/255, 172/255], 'se');
+    frevede_errorbarplot(mean_cvsi_perf_all.time, cvsi_motor_beta_fast{i}, [80/255, 172/255, 123/255], 'se');
     hold on;
-    frevede_errorbarplot(mean_cvsi_perf_all.time, cvsi_motor_beta_slow{i}, [80/255, 172/255, 123/255], 'se');
+    frevede_errorbarplot(mean_cvsi_perf_all.time, cvsi_motor_beta_slow{i}, [167/255, 216/255, 188/255], 'se');
 
     xline(0); xline(1); xline(3); yline(0)
-    xlim([-0.5 3.5]); ylim([-7 7])
+    xlim([0 3]); ylim([-7 7])
     title(titles_perf_contrasts{i})
 
 end

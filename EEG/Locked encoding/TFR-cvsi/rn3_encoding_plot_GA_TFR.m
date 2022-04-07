@@ -109,9 +109,9 @@ end
 %% full time
 cvsi_motor_beta = {squeeze(mean(squeeze(cvsi_encoding_all.cvsi_motor_load_one_T1(:,:,beta_index,:)),2)), squeeze(mean(squeeze(cvsi_encoding_all.cvsi_motor_load_one_T2(:,:,beta_index,:)),2)), squeeze(mean(squeeze(cvsi_encoding_all.cvsi_motor_load_two(:,:,beta_index,:)),2))};
 
-linecolors = {'black','black','black'};
+linecolors = {[140/255, 69/255, 172/255],[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
 ylims = {[-10,10],[-10,10],[-5,5]};
-figure; sgtitle("motor 13-30 Hz")
+figure; %sgtitle("motor 13-30 Hz")
 
 for i = 1:length(timecourse_titles)
     
@@ -130,16 +130,16 @@ end
 cvsi_motor_beta_postenc = {(cvsi_motor_beta{1}(:,T1_index) + cvsi_motor_beta{2}(:,T2_index)) / 2, cvsi_motor_beta{3}(:,T1_index)};
 
 postenc_titles = {'load one', 'load two'};
-linecolors = {'blue','black'};
+linecolors = {[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
 
-figure; sgtitle("motor 13-30 Hz: encoding response")
+figure;
 
 frevede_errorbarplot(mean_cvsi_encoding_all.time(T1_index), cvsi_motor_beta_postenc{1}, linecolors{1}, 'se');
 hold on 
 frevede_errorbarplot(mean_cvsi_encoding_all.time(T1_index), cvsi_motor_beta_postenc{2}, linecolors{2}, 'se');
 
 xline(0); xline(1); yline(0)
-xlim([0 2]); ylim([-5 5])
+xlim([0 1.2]); ylim([-5 5])
 
 % %% post-encoding bargraph
 % 

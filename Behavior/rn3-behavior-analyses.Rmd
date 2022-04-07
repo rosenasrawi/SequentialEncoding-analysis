@@ -103,7 +103,7 @@ data$targetMoment = as.factor(data$targetMoment)
 levels(data$targetMoment) = c("Early", "Late")
 
 data$dialType = as.factor(data$dialType)
-levels(data$dialType) = c("Vertical", "Horizontal")
+levels(data$dialType) = c("Up", "Right")
 
 data$targetLocation = as.factor(data$targetLocation)
 
