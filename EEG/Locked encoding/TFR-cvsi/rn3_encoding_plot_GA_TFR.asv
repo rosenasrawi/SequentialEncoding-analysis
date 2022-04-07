@@ -189,20 +189,19 @@ end
 %% using time-course clusters
 
 % Eye-balling clusters
-% [cvsi_encoding_all.time;stat_motor_beta{1}]
-% [cvsi_encoding_all.time;stat_motor_beta{2}]
-% [cvsi_encoding_all.time;stat_motor_beta{3}]
+[cvsi_encoding_all.time;stat_motor_beta{1}]
+[cvsi_encoding_all.time;stat_motor_beta{2}]
+[cvsi_encoding_all.time;stat_motor_beta{3}]
 
 mean_cvsi_encoding_all.label = complete_label;
 
 topo_contrasts = {'rvsl_resp_load_one_T1','rvsl_resp_load_one_T2','rvsl_resp_load_two'};
 time_select = {{[0.7 1], [2.15 3]}, {[1.5 1.7], [2.2 3]}, {[0.6 0.8], [2 3]}};
-time_titles = {'post-encoding','pre-probe'};
+time_ti
 
 for contrast = 1:length(topo_contrasts)  
     
     figure;
-    sgtitle(titles_enc_contrasts{contrast});
     
     cfg = [];
 
@@ -221,8 +220,8 @@ for contrast = 1:length(topo_contrasts)
         ft_topoplotTFR(cfg, mean_cvsi_encoding_all);
         colormap(flipud(brewermap(100,'RdBu')));
     
-        title(time_titles{time}, 'FontSize', 14,  'FontWeight', 'normal', 'Position', [0, -1, 0]);
-    end
+        title(titles_enc_contrasts{contrast}, 'FontSize', 14,  'FontWeight', 'normal', 'Position', [0, -1, 0]);
+
 end
 
 

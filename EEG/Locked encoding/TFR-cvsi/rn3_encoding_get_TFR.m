@@ -8,7 +8,7 @@ laplacian = true;
 
 %% Define parameters
 
-subjects = 14;
+subjects = [1:5,7:19,21:27];
 
 %% Loop
 
@@ -499,8 +499,8 @@ for this_subject = subjects
     
     % -- Load two
     
-    a = mean(tfr.powspctrm(trials_load_two_reqresp_right, :, :, :)); % right
-    b = mean(tfr.powspctrm(trials_load_two_reqresp_left, :, :, :)); % left
+    a = mean(tfr.powspctrm(trials_load_two_target_T1_reqresp_right, :, :, :)); % right
+    b = mean(tfr.powspctrm(trials_load_two_target_T1_reqresp_left, :, :, :)); % left
     rvsl_resp_load_two = squeeze(((a-b) ./ (a+b)) * 100);
     
     %% Right vs left item location (topography)
@@ -519,8 +519,8 @@ for this_subject = subjects
     
     % -- Load two
     
-    a = mean(tfr.powspctrm(trials_load_two_item_right, :, :, :)); % right
-    b = mean(tfr.powspctrm(trials_load_two_item_left, :, :, :)); % left
+    a = mean(tfr.powspctrm(trials_load_two_target_T1_item_right, :, :, :)); % right
+    b = mean(tfr.powspctrm(trials_load_two_target_T1_item_left, :, :, :)); % left
     rvsl_item_load_two = squeeze(((a-b) ./ (a+b)) * 100);
         
     %% Contrast parameters in structure
