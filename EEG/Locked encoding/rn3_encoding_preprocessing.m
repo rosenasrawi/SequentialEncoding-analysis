@@ -3,7 +3,7 @@
 clc; clear; close all
 %% Define parameters
 
-subjects = 14;
+subjects = 1;
 
 for this_subject = subjects
     %% Close any old figures
@@ -76,6 +76,7 @@ for this_subject = subjects
     emg.label = {'emgLrect','emgRrect'};
 
     data = ft_appenddata(cfg, data, emg); % append
+    
     %% Keep channels of interest
 
     cfg = [];
