@@ -1,4 +1,4 @@
 **/*.html
 .DS_Store
-**/.Rhistory
-**/.asv
+**/*.Rhistory
+**/*.asv
