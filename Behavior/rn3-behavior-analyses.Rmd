@@ -149,8 +149,8 @@ for (sub in 1:length(levels(data$subjectID))){
             # Prec vs imprec
             this.med.err = med.err.subj[sub,load,tmom,dial,tloc,hand] 
 
-            precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$difference > this.med.err] = 'prec'
-            precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$difference < this.med.err] = 'imprec'
+            precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$difference < this.med.err] = 'prec'
+            precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$difference > this.med.err] = 'imprec'
             precImprec[data$subjectID == this.sub & data$loadType == this.load & data$targetMoment == this.tmom & data$dialType == this.dial & data$targetLocation == this.tloc & data$clockwise == this.hand & data$difference == this.med.err] = NaN
             
           }    

@@ -24,19 +24,26 @@ for this_subject = subjects
     
     full_perf_all.load_two_T1_fast_slow(this_subject,:,:,:)         = full_perf.load_two_T1_fast_slow;
     full_perf_all.load_two_T2_fast_slow(this_subject,:,:,:)         = full_perf.load_two_T2_fast_slow;
-    full_perf_all.load_two_T1_prec_imprec(this_subject,:,:,:)       = full_perf.load_two_T1_prec_imprec;
-    full_perf_all.load_two_T2_prec_imprec(this_subject,:,:,:)       = full_perf.load_two_T2_prec_imprec;
+    full_perf_all.load_two_T1_T2_fast_slow(this_subject,:,:,:)      = full_perf.load_two_T1_fast_slow - full_perf.load_two_T2_fast_slow;
+
+    
+    full_perf_all.load_two_T1_prec_imprec(this_subject,:,:,:)       = full_perf.load_two_T1_prec_imprec .* -1; % Temporarily * -1, can remove after having rerun get-TFR
+    full_perf_all.load_two_T2_prec_imprec(this_subject,:,:,:)       = full_perf.load_two_T2_prec_imprec .* -1;
+    full_perf_all.load_two_T1_T2_prec_imprec(this_subject,:,:,:)    = full_perf.load_two_T1_prec_imprec .* -1 - full_perf.load_two_T2_prec_imprec  .* -1;
 
 end
 
 %% Average
 
-mean_full_perf_all = selectfields(full_perf_all,{'label', 'time', 'freq', 'dimord'});
+mean_full_perf_all = selectfields(full_perf_all, {'label', 'time', 'freq', 'dimord'});
 
 mean_full_perf_all.load_two_T1_fast_slow         = squeeze(mean(full_perf_all.load_two_T1_fast_slow));
 mean_full_perf_all.load_two_T2_fast_slow         = squeeze(mean(full_perf_all.load_two_T2_fast_slow));
+mean_full_perf_all.load_two_T1_T2_fast_slow      = squeeze(mean(full_perf_all.load_two_T1_T2_fast_slow));
+
 mean_full_perf_all.load_two_T1_prec_imprec       = squeeze(mean(full_perf_all.load_two_T1_prec_imprec));
 mean_full_perf_all.load_two_T2_prec_imprec       = squeeze(mean(full_perf_all.load_two_T2_prec_imprec));
+mean_full_perf_all.load_two_T1_T2_prec_imprec    = squeeze(mean(full_perf_all.load_two_T1_T2_prec_imprec));
 
 %% Save
 
