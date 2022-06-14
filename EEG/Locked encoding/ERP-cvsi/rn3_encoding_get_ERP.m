@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = [2:5,7:19,21:27];
+subjects = [1:5,7:19,21:27];
 %subjects = 1; % Try-out
 
 %% Loop over subjects
