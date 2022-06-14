@@ -64,6 +64,13 @@ for this_subject = subjects
 
     data = ft_rejectcomponent(cfg, ica, data);
 
+    %% Surface laplacian if specified
+
+    cfg = [];
+    cfg.elec = ft_read_sens('standard_1020.elc');
+
+    data = ft_scalpcurrentdensity(cfg, data);
+
     %% Baseline correction
 
     cfg = []; 
@@ -107,7 +114,7 @@ for this_subject = subjects
     
     %% Combined trial types
 
-    %% Motor
+    %% Motor (response L/R)
 
     % - Load one & T1    
     trials_load_one_target_T1_reqresp_left      = trials_load_one & trials_target_T1 & trials_reqresp_left;
@@ -121,7 +128,7 @@ for this_subject = subjects
     trials_load_two_target_T1_reqresp_left      = trials_load_two & trials_target_T1 & trials_reqresp_left | trials_load_two & trials_target_T2 & trials_reqresp_right;
     trials_load_two_target_T1_reqresp_right     = trials_load_two & trials_target_T1 & trials_reqresp_right | trials_load_two & trials_target_T2 & trials_reqresp_left;
     
-    %% Visual
+    %% Visual (item location L/R)
 
     % - Load one & T1    
     trials_load_one_target_T1_item_left      = trials_load_one & trials_target_T1 & trials_item_left;
@@ -187,22 +194,39 @@ for this_subject = subjects
     % Contra versus ipsi
     cvsi_visual_load_one_T1 = contra_visual_load_one_T1 - ipsi_visual_load_one_T1;
 
-    %% EMG
+    %% EMG (motor)
     
     % Contra
     RL = squeeze(mean(tl.trial(trials_load_one_target_T1_reqresp_right, chan_EMG_left, :, :)));
     LR = squeeze(mean(tl.trial(trials_load_one_target_T1_reqresp_left, chan_EMG_right, :, :)));
 
-    contra_EMG_load_one_T1 = (RL + LR) ./ 2;
+    contra_EMG_mot_load_one_T1 = (RL + LR) ./ 2;
     
     % Ispi
     LL = squeeze(mean(tl.trial(trials_load_one_target_T1_reqresp_left, chan_EMG_left, :, :)));
     RR = squeeze(mean(tl.trial(trials_load_one_target_T1_reqresp_right, chan_EMG_right, :, :)));
 
-    ipsi_EMG_load_one_T1 = (LL + RR) ./ 2;
+    ipsi_EMG_mot_load_one_T1 = (LL + RR) ./ 2;
     
     % Contra versus ipsi
-    cvsi_EMG_load_one_T1 = ipsi_EMG_load_one_T1 - contra_EMG_load_one_T1;
+    cvsi_EMG_mot_load_one_T1 = contra_EMG_mot_load_one_T1 - ipsi_mot_EMG_load_one_T1;
+    
+    %% EMG (visual)
+    
+    % Contra
+    RL = squeeze(mean(tl.trial(trials_load_one_target_T1_item_right, chan_EMG_left, :, :)));
+    LR = squeeze(mean(tl.trial(trials_load_one_target_T1_item_left, chan_EMG_right, :, :)));
+
+    contra_EMG_vis_load_one_T1 = (RL + LR) ./ 2;
+    
+    % Ispi
+    LL = squeeze(mean(tl.trial(trials_load_one_target_T1_item_left, chan_EMG_left, :, :)));
+    RR = squeeze(mean(tl.trial(trials_load_one_target_T1_item_right, chan_EMG_right, :, :)));
+
+    ipsi_EMG_vis_load_one_T1 = (LL + RR) ./ 2;
+    
+    % Contra versus ipsi
+    cvsi_EMG_vis_load_one_T1 = contra_EMG_vis_load_one_T1 - ipsi_EMG_vis_load_one_T1;
 
     %% Load one - T2
     
@@ -240,23 +264,40 @@ for this_subject = subjects
     % Contra versus ipsi
     cvsi_visual_load_one_T2 = contra_visual_load_one_T2 - ipsi_visual_load_one_T2;
 
-    %% EMG
+    %% EMG (motor)
     
     % Contra
     RL = squeeze(mean(tl.trial(trials_load_one_target_T2_reqresp_right, chan_EMG_left, :, :)));
     LR = squeeze(mean(tl.trial(trials_load_one_target_T2_reqresp_left, chan_EMG_right, :, :)));
 
-    contra_EMG_load_one_T2 = (RL + LR) ./ 2;
+    contra_EMG_mot_load_one_T2 = (RL + LR) ./ 2;
     
     % Ispi
     LL = squeeze(mean(tl.trial(trials_load_one_target_T2_reqresp_left, chan_EMG_left, :, :)));
     RR = squeeze(mean(tl.trial(trials_load_one_target_T2_reqresp_right, chan_EMG_right, :, :)));
 
-    ipsi_EMG_load_one_T2 = (LL + RR) ./ 2;
+    ipsi_EMG_mot_load_one_T2 = (LL + RR) ./ 2;
     
     % Contra versus ipsi
-    cvsi_EMG_load_one_T2 = ipsi_EMG_load_one_T2 - contra_EMG_load_one_T2;
+    cvsi_EMG_mot_load_one_T2 = contra_EMG_mot_load_one_T2 - ipsi_mot_EMG_load_one_T2;
     
+    %% EMG (visual)
+    
+    % Contra
+    RL = squeeze(mean(tl.trial(trials_load_one_target_T2_item_right, chan_EMG_left, :, :)));
+    LR = squeeze(mean(tl.trial(trials_load_one_target_T2_item_left, chan_EMG_right, :, :)));
+
+    contra_EMG_vis_load_one_T2 = (RL + LR) ./ 2;
+    
+    % Ispi
+    LL = squeeze(mean(tl.trial(trials_load_one_target_T2_item_left, chan_EMG_left, :, :)));
+    RR = squeeze(mean(tl.trial(trials_load_one_target_T2_item_right, chan_EMG_right, :, :)));
+
+    ipsi_EMG_vis_load_one_T2 = (LL + RR) ./ 2;
+    
+    % Contra versus ipsi
+    cvsi_EMG_vis_load_one_T2 = contra_EMG_vis_load_one_T2 - ipsi_EMG_vis_load_one_T2;
+
     %% Load two
 
     %% Motor
@@ -293,22 +334,39 @@ for this_subject = subjects
     % Contra versus ipsi
     cvsi_visual_load_two = contra_visual_load_two - ipsi_visual_load_two;
 
-    %% EMG
+    %% EMG (motor)
     
     % Contra
     RL = squeeze(mean(tl.trial(trials_load_two_target_T1_reqresp_right, chan_EMG_left, :, :)));
     LR = squeeze(mean(tl.trial(trials_load_two_target_T1_reqresp_left, chan_EMG_right, :, :)));
 
-    contra_EMG_load_two = (RL + LR) ./ 2;
+    contra_EMG_mot_load_two = (RL + LR) ./ 2;
     
     % Ispi
     LL = squeeze(mean(tl.trial(trials_load_two_target_T1_reqresp_left, chan_EMG_left, :, :)));
     RR = squeeze(mean(tl.trial(trials_load_two_target_T1_reqresp_right, chan_EMG_right, :, :)));
 
-    ipsi_EMG_load_two = (LL + RR) ./ 2;
+    ipsi_EMG_mot_load_two = (LL + RR) ./ 2;
     
     % Contra versus ipsi
-    cvsi_EMG_load_two = ipsi_EMG_load_two - contra_EMG_load_two; 
+    cvsi_EMG_mot_load_two = contra_EMG_mot_load_two - ipsi_mot_EMG_load_two;
+    
+    %% EMG (visual)
+    
+    % Contra
+    RL = squeeze(mean(tl.trial(trials_load_two_target_T1_item_right, chan_EMG_left, :, :)));
+    LR = squeeze(mean(tl.trial(trials_load_two_target_T1_item_left, chan_EMG_right, :, :)));
+
+    contra_EMG_vis_load_two = (RL + LR) ./ 2;
+    
+    % Ispi
+    LL = squeeze(mean(tl.trial(trials_load_two_target_T1_item_left, chan_EMG_left, :, :)));
+    RR = squeeze(mean(tl.trial(trials_load_two_target_T1_item_right, chan_EMG_right, :, :)));
+
+    ipsi_EMG_vis_load_two = (LL + RR) ./ 2;
+    
+    % Contra versus ipsi
+    cvsi_EMG_vis_load_two = contra_EMG_vis_load_two - ipsi_EMG_vis_load_two;
     
     %% Contrast parameters in structure
     
@@ -327,10 +385,14 @@ for this_subject = subjects
     erp.ipsi_visual_load_one_T1         = ipsi_visual_load_one_T1;
     erp.cvsi_visual_load_one_T1         = cvsi_visual_load_one_T1;
     
-    erp.contra_EMG_load_one_T1          = contra_EMG_load_one_T1;
-    erp.ipsi_EMG_load_one_T1            = ipsi_EMG_load_one_T1;
-    erp.cvsi_EMG_load_one_T1            = cvsi_EMG_load_one_T1;
-    
+    erp.contra_EMG_mot_load_one_T1      = contra_EMG_mot_load_one_T1;
+    erp.ipsi_EMG_mot_load_one_T1        = ipsi_EMG_mot_load_one_T1;
+    erp.cvsi_EMG_mot_load_one_T1        = cvsi_EMG_mot_load_one_T1;
+
+    erp.contra_EMG_vis_load_one_T1      = contra_EMG_vis_load_one_T1;
+    erp.ipsi_EMG_vis_load_one_T1        = ipsi_EMG_vis_load_one_T1;
+    erp.cvsi_EMG_vis_load_one_T1        = cvsi_EMG_vis_load_one_T1;
+
     % Load one-T2
     erp.contra_motor_load_one_T2        = contra_motor_load_one_T2;
     erp.ipsi_motor_load_one_T2          = ipsi_motor_load_one_T2;
@@ -340,9 +402,13 @@ for this_subject = subjects
     erp.ipsi_visual_load_one_T2         = ipsi_visual_load_one_T2;
     erp.cvsi_visual_load_one_T2         = cvsi_visual_load_one_T2;
     
-    erp.contra_EMG_load_one_T2          = contra_EMG_load_one_T2;
-    erp.ipsi_EMG_load_one_T2            = ipsi_EMG_load_one_T2;
-    erp.cvsi_EMG_load_one_T2            = cvsi_EMG_load_one_T2;
+    erp.contra_EMG_mot_load_one_T2      = contra_EMG_mot_load_one_T2;
+    erp.ipsi_EMG_mot_load_one_T2        = ipsi_EMG_mot_load_one_T2;
+    erp.cvsi_EMG_mot_load_one_T2        = cvsi_EMG_mot_load_one_T2;
+
+    erp.contra_EMG_vis_load_one_T2      = contra_EMG_vis_load_one_T2;
+    erp.ipsi_EMG_vis_load_one_T2        = ipsi_EMG_vis_load_one_T2;
+    erp.cvsi_EMG_vis_load_one_T2        = cvsi_EMG_vis_load_one_T2;
     
     % Load two
     erp.contra_motor_load_two           = contra_motor_load_two;
@@ -353,10 +419,14 @@ for this_subject = subjects
     erp.ipsi_visual_load_two            = ipsi_visual_load_two;
     erp.cvsi_visual_load_two            = cvsi_visual_load_two;
     
-    erp.contra_EMG_load_two             = contra_EMG_load_two;
-    erp.ipsi_EMG_load_two               = ipsi_EMG_load_two;
-    erp.cvsi_EMG_load_two               = cvsi_EMG_load_two;
-    
+    erp.contra_EMG_mot_load_two         = contra_EMG_mot_load_two;
+    erp.ipsi_EMG_mot_load_two           = ipsi_EMG_mot_load_two;
+    erp.cvsi_EMG_mot_load_two           = cvsi_EMG_mot_load_two;
+
+    erp.contra_EMG_vis_load_two         = contra_EMG_vis_load_two;
+    erp.ipsi_EMG_vis_load_two           = ipsi_EMG_vis_load_two;
+    erp.cvsi_EMG_vis_load_two           = cvsi_EMG_vis_load_two;
+
     %% Save 
         
     save([param.path, 'Processed/EEG/Locked encoding/erp contrasts encoding/' 'erp_encoding_' param.subjectIDs{this_subject}], 'erp');
