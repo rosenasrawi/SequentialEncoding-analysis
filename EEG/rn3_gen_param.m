@@ -32,6 +32,9 @@ function [param, eegfiles] = rn3_gen_param(this_subject)
     param.PO8                = 'PO8';
     param.chan_visual_left   = {'O1', 'P03', 'P07'};
     param.chan_visual_left   = {'O2', 'P04', 'P08'};
+
+    param.emgLrect           = 'emgLrect';
+    param.emgRrect           = 'emgRrect';
     
     % Times
     param.T_enc1_window      = [1 4];
