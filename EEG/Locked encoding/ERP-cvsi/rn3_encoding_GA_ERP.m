@@ -30,10 +30,14 @@ for this_subject = subjects
     erp_all.cvsi_visual_load_one_T2(this_subject,:)      = erp.cvsi_visual_load_one_T2;
     erp_all.cvsi_visual_load_two(this_subject,:)         = erp.cvsi_visual_load_two;
 
-    erp_all.cvsi_EMG_load_one_T1(this_subject,:)         = erp.cvsi_EMG_load_one_T1;
-    erp_all.cvsi_EMG_load_one_T2(this_subject,:)         = erp.cvsi_EMG_load_one_T2;
-    erp_all.cvsi_EMG_load_two(this_subject,:)            = erp.cvsi_EMG_load_two;
-
+    erp_all.cvsi_EMG_mot_load_one_T1(this_subject,:)     = erp.cvsi_EMG_mot_load_one_T1;
+    erp_all.cvsi_EMG_mot_load_one_T2(this_subject,:)     = erp.cvsi_EMG_mot_load_one_T2;
+    erp_all.cvsi_EMG_mot_load_two(this_subject,:)        = erp.cvsi_EMG_mot_load_two;
+    
+    erp_all.cvsi_EMG_vis_load_one_T1(this_subject,:)     = erp.cvsi_EMG_vis_load_one_T1;
+    erp_all.cvsi_EMG_vis_load_one_T2(this_subject,:)     = erp.cvsi_EMG_vis_load_one_T2;
+    erp_all.cvsi_EMG_vis_load_two(this_subject,:)        = erp.cvsi_EMG_vis_load_two;
+    
 end
 
 %% Plot
@@ -42,7 +46,8 @@ timecourse_titles = {'Load one - T1', 'Load one - T2', 'Load two'};
 
 erp_motor = {erp_all.cvsi_motor_load_one_T1, erp_all.cvsi_motor_load_one_T2, erp_all.cvsi_motor_load_two};
 erp_visual = {erp_all.cvsi_visual_load_one_T1, erp_all.cvsi_visual_load_one_T2, erp_all.cvsi_visual_load_two};
-erp_EMG = {erp_all.cvsi_EMG_load_one_T1, erp_all.cvsi_EMG_load_one_T2, erp_all.cvsi_EMG_load_two};
+erp_EMG_mot = {erp_all.cvsi_EMG_mot_load_one_T1, erp_all.cvsi_EMG_mot_load_one_T2, erp_all.cvsi_EMG_mot_load_two};
+erp_EMG_vis = {erp_all.cvsi_EMG_vis_load_one_T1, erp_all.cvsi_EMG_vis_load_one_T2, erp_all.cvsi_EMG_vis_load_two};
 
 %% Motor
 
@@ -53,7 +58,7 @@ for i = 1:length(timecourse_titles)
     
     subplot(1,3,i)
     frevede_errorbarplot(erp_all.time, erp_motor{i}, linecolors{i}, 'se');
-    xline(0); xline(1); xline(3); yline(0); xlim([0 3]);
+    xline(0); xline(1); xline(3); yline(0); xlim([0.25 4]);
     title(timecourse_titles{i})
 end
 
@@ -66,19 +71,32 @@ for i = 1:length(timecourse_titles)
     
     subplot(1,3,i)
     frevede_errorbarplot(erp_all.time, erp_visual{i}, linecolors{i}, 'se');
-    xline(0); xline(1); xline(3); yline(0); xlim([0 3]);
+    xline(0); xline(1); xline(3); yline(0); xlim([0.25 4]);
     title(timecourse_titles{i})
 end
 
-%% EMG
+%% EMG (motor)
 
-figure; sgtitle("EMG (L/R)")
+figure; sgtitle("EMG (L/R response)")
 linecolors = {[140/255, 69/255, 172/255],[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
 
 for i = 1:length(timecourse_titles)
     
     subplot(1,3,i)
-    frevede_errorbarplot(erp_all.time, erp_EMG{i}, linecolors{i}, 'se');
-    xline(0); xline(1); xline(3); yline(0); xlim([0 3]);
+    frevede_errorbarplot(erp_all.time, erp_EMG_mot{i}, linecolors{i}, 'se');
+    xline(0); xline(1); xline(3); yline(0); xlim([0.25 4]);
+    title(timecourse_titles{i})
+end
+
+%% EMG (visual)
+
+figure; sgtitle("EMG (L/R item location)")
+linecolors = {[140/255, 69/255, 172/255],[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
+
+for i = 1:length(timecourse_titles)
+    
+    subplot(1,3,i)
+    frevede_errorbarplot(erp_all.time, erp_EMG_vis{i}, linecolors{i}, 'se');
+    xline(0); xline(1); xline(3); yline(0); xlim([0.25 4]);
     title(timecourse_titles{i})
 end

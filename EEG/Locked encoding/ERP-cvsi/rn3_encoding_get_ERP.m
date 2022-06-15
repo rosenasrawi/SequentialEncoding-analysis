@@ -4,8 +4,8 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = [1:5,7:19,21:27];
-%subjects = 1; % Try-out
+subjects = [3:5,7:19,21:27];
+% subjects = 2;% Try-out
 
 %% Loop over subjects
 
@@ -35,8 +35,10 @@ for this_subject = subjects
 
     %% Load usable trials
  
-    load([param.path, 'Processed/EEG/Locked encoding/usable trials encoding/' 'usable_trials_encoding_' param.subjectIDs{this_subject}], 'trl2keep');
-    
+    load([param.path, 'Processed/EEG/Locked encoding/usable trials encoding/' 'usable_trials_encoding_' param.subjectIDs{this_subject}], 'trl2keep'); trl2keep_EEG = trl2keep;
+    load([param.path, 'Processed/EEG/Locked encoding/usable trials encoding/' 'usable_trials_EMG_encoding_' param.subjectIDs{this_subject}], 'trl2keep'); trl2keep_EMG = trl2keep;
+
+    clear trl2keep
     %% Keep channels of interest
 
     cfg = [];
@@ -48,7 +50,7 @@ for this_subject = subjects
        
     good_RT = contains(this_sub_log.goodBadTrials, 'TRUE');
     
-    good_trials = trl2keep & good_RT;
+    good_trials = trl2keep_EEG & trl2keep_EMG & good_RT;
         
     %% Remove bad trials
     
@@ -64,13 +66,27 @@ for this_subject = subjects
 
     data = ft_rejectcomponent(cfg, ica, data);
 
-    %% Surface laplacian if specified
+    %% Keep EMG info
+
+    complete_label = data.label;
+    complete_trial = data.trial;
+    emg_index = contains(complete_label, {'emgLrect','emgRrect'});
+
+    %% Surface laplacian
 
     cfg = [];
-    cfg.elec = ft_read_sens('standard_1020.elc');
+    cfg.elec = ft_read_sens('standard_1020.elc'); % Does not read the EMG electrodes!!
 
     data = ft_scalpcurrentdensity(cfg, data);
 
+    %% Add EMG info
+    
+    data.label = complete_label;
+
+    for time = 1:length(data.trial)
+        data.trial{time} = [data.trial{time}; complete_trial{time}(emg_index,:)];
+    end
+    
     %% Baseline correction
 
     cfg = []; 
@@ -209,7 +225,7 @@ for this_subject = subjects
     ipsi_EMG_mot_load_one_T1 = (LL + RR) ./ 2;
     
     % Contra versus ipsi
-    cvsi_EMG_mot_load_one_T1 = contra_EMG_mot_load_one_T1 - ipsi_mot_EMG_load_one_T1;
+    cvsi_EMG_mot_load_one_T1 = contra_EMG_mot_load_one_T1 - ipsi_EMG_mot_load_one_T1;
     
     %% EMG (visual)
     
@@ -279,7 +295,7 @@ for this_subject = subjects
     ipsi_EMG_mot_load_one_T2 = (LL + RR) ./ 2;
     
     % Contra versus ipsi
-    cvsi_EMG_mot_load_one_T2 = contra_EMG_mot_load_one_T2 - ipsi_mot_EMG_load_one_T2;
+    cvsi_EMG_mot_load_one_T2 = contra_EMG_mot_load_one_T2 - ipsi_EMG_mot_load_one_T2;
     
     %% EMG (visual)
     
@@ -349,7 +365,7 @@ for this_subject = subjects
     ipsi_EMG_mot_load_two = (LL + RR) ./ 2;
     
     % Contra versus ipsi
-    cvsi_EMG_mot_load_two = contra_EMG_mot_load_two - ipsi_mot_EMG_load_two;
+    cvsi_EMG_mot_load_two = contra_EMG_mot_load_two - ipsi_EMG_mot_load_two;
     
     %% EMG (visual)
     
