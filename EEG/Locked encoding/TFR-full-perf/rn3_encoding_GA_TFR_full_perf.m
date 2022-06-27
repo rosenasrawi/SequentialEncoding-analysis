@@ -26,7 +26,6 @@ for this_subject = subjects
     full_perf_all.load_two_T2_fast_slow(this_subject,:,:,:)         = full_perf.load_two_T2_fast_slow;
     full_perf_all.load_two_T1_T2_fast_slow(this_subject,:,:,:)      = full_perf.load_two_T1_fast_slow - full_perf.load_two_T2_fast_slow;
 
-    
     full_perf_all.load_two_T1_prec_imprec(this_subject,:,:,:)       = full_perf.load_two_T1_prec_imprec .* -1; % Temporarily * -1, can remove after having rerun get-TFR
     full_perf_all.load_two_T2_prec_imprec(this_subject,:,:,:)       = full_perf.load_two_T2_prec_imprec .* -1;
     full_perf_all.load_two_T1_T2_prec_imprec(this_subject,:,:,:)    = full_perf.load_two_T1_prec_imprec .* -1 - full_perf.load_two_T2_prec_imprec  .* -1;
