@@ -4,7 +4,9 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = [5,7:19,21:27];
+% subjects = [1:5,7:19,21:27];
+
+subjects = 1;
 
 for this_subject = subjects
 
@@ -74,6 +76,13 @@ for this_subject = subjects
         cfg.bpfreq = [13 30];
         data = ft_preprocessing(cfg, data);
     end
+
+    %% Resample
+
+    cfg = [];
+    cfg.resamplefs = 50; 
+    
+    data = ft_resampledata(cfg, data);
 
     %% Temporal smoothing (removing the higher frequencies)
 
@@ -227,7 +236,8 @@ for this_subject = subjects
     allTrials = 1:size(data_two.trial, 1);
 
     % Class
-    motorClass = trials_reqresp_right(trials_load_two); % 0 if left, 1 if right
+    motorClass = trials_load_two & trials_target_T1 & trials_reqresp_right | trials_load_two & trials_target_T2 & trials_reqresp_left;
+    motorClass = motorClass(trials_load_two); % 0 if left, 1 if right
 
     for thisTrial = allTrials
 
@@ -343,7 +353,8 @@ for this_subject = subjects
     allTrials = 1:size(data_two.trial, 1);
 
     % Class
-    visualClass = trials_item_right(trials_load_two); % 0 if left, 1 if right
+    visualClass = trials_load_two & trials_target_T1 & trials_item_right | trials_load_two & trials_target_T2 & trials_item_left;
+    visualClass = visualClass(trials_load_two); % 0 if left, 1 if right
 
     for thisTrial = allTrials
 
@@ -373,11 +384,18 @@ for this_subject = subjects
         end
 
     end
+    
     %% Save
 
     save([param.path, 'Processed/EEG/Locked encoding/decoding/' 'decoding_' param.subjectIDs{this_subject}], 'decoding');
     
 end
+
+%% Save time structure (temporary)
+
+time = data.time{1}*1000;
+
+save([param.path, 'Processed/EEG/Locked encoding/decoding/' 'time_all'], 'time');
 
 %% Plot decoding accuracy
 
