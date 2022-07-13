@@ -4,8 +4,8 @@ clc; clear; close all
 
 %% Define parameters
 
-subjectIDs = [1:5,7:15];
-subjects = 1:14;
+subjectIDs = [1:2];
+subjects = 1:2;
 
 %% Load data files
 
@@ -17,39 +17,34 @@ for this_subject = subjects
     
     load([param.path, 'Processed/EEG/Locked encoding/decoding/' 'decoding_' param.subjectIDs{sub}], 'decoding');
 
-    decoding_all.motor_correct_one_T1(this_subject,:)       = squeeze(mean(decoding.motor_correct_one_T1));
-    decoding_all.motor_correct_one_T2(this_subject,:)       = squeeze(mean(decoding.motor_correct_one_T2));
-    decoding_all.motor_correct_two(this_subject,:)          = squeeze(mean(decoding.motor_correct_two));
+    fn = fieldnames(decoding);
+    fn = fn(~contains(fn, 'time'));
+    
+    for f = 1:length(fn)
+        decoding_all.(fn{f})(this_subject,:) = squeeze(mean(decoding.(fn{f})));
+    end
 
-    decoding_all.motor_distance_one_T1(this_subject,:)      = squeeze(mean(decoding.motor_distance_one_T1));
-    decoding_all.motor_distance_one_T2(this_subject,:)      = squeeze(mean(decoding.motor_distance_one_T2));
-    decoding_all.motor_distance_two(this_subject,:)         = squeeze(mean(decoding.motor_distance_two));
-
-    decoding_all.visual_correct_one_T1(this_subject,:)      = squeeze(mean(decoding.visual_correct_one_T1));
-    decoding_all.visual_correct_one_T2(this_subject,:)      = squeeze(mean(decoding.visual_correct_one_T2));
-    decoding_all.visual_correct_two(this_subject,:)         = squeeze(mean(decoding.visual_correct_two));
-
-    decoding_all.visual_distance_one_T1(this_subject,:)     = squeeze(mean(decoding.visual_distance_one_T1));
-    decoding_all.visual_distance_one_T2(this_subject,:)     = squeeze(mean(decoding.visual_distance_one_T2));
-    decoding_all.visual_distance_two(this_subject,:)        = squeeze(mean(decoding.visual_distance_two));
+    decoding_all.time = decoding.time;
 
 end
 
-%% Load time param (temporary)
-
-load([param.path, 'Processed/EEG/Locked encoding/decoding/' 'time_all'], 'time');
-% time = time{1}*1000;
-
 %% Plot variables
 decoding_titles = {'Load one - T1', 'Load one - T2', 'Load two'};
+linecolors = {[140/255, 69/255, 172/255], [140/255, 69/255, 172/255], [80/255, 172/255, 123/255]};
 
-motor_correct   = {decoding_all.motor_correct_one_T1, decoding_all.motor_correct_one_T2, decoding_all.motor_correct_two};
-motor_distance  = {decoding_all.motor_distance_one_T1, decoding_all.motor_distance_one_T2, decoding_all.motor_distance_two}; 
+fn = fieldnames(decoding_all);
 
-visual_correct   = {decoding_all.visual_correct_one_T1, decoding_all.visual_correct_one_T2, decoding_all.visual_correct_two};
-visual_distance  = {decoding_all.visual_distance_one_T1, decoding_all.visual_distance_one_T2, decoding_all.visual_distance_two}; 
+motor_correct = fn(contains(fn, 'motor_correct'));
+motor_distance = fn(contains(fn, 'motor_distance'));
 
-linecolors = {[140/255, 69/255, 172/255],[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
+motor_beta_correct = fn(contains(fn, 'motor_beta_correct'));
+motor_beta_distance = fn(contains(fn, 'motor_beta_distance'));
+
+visual_correct = fn(contains(fn, 'visual_correct'));
+visual_distance = fn(contains(fn, 'visual_distance'));
+
+visual_alpha_correct = fn(contains(fn, 'visual_alpha_correct'));
+visual_alpha_distance = fn(contains(fn, 'visual_alpha_distance'));
 
 %% Plot motor
 
@@ -60,13 +55,13 @@ for i = 1:length(decoding_titles)
 
     subplot(1,3,i)
 
-    frevede_errorbarplot(time, motor_correct{i}, linecolors{i}, 'se');
+    frevede_errorbarplot(decoding_all.time, decoding_all.(motor_correct{i}), linecolors{i}, 'se');
 
     title(decoding_titles{i}); 
     xlabel('time (s)'); ylabel('decoding accuracy');   
 
     xline(0, '--k'); xline(1000, '--k'); yline(0.5, '--k')
-    ylim([.4 .7]); xlim([0 3500]); 
+    ylim([.4 .8]); xlim([0 3500]); 
 
 end
 
@@ -79,12 +74,50 @@ for i = 1:length(decoding_titles)
 
     subplot(1,3,i)
 
-    frevede_errorbarplot(time, visual_correct{i}, linecolors{i}, 'se');
+    frevede_errorbarplot(decoding.time, decoding_all.(visual_correct{i}), linecolors{i}, 'se');
 
     title(decoding_titles{i}); 
     xlabel('time (s)'); ylabel('decoding accuracy');   
 
     xline(0, '--k'); xline(1000, '--k'); yline(0.5, '--k')
-    ylim([.4 .6]); xlim([0 3500]); 
+    ylim([.4 .8]); xlim([0 3500]); 
+
+end
+
+%% Plot motor (beta)
+
+figure;
+sgtitle('Motor (beta) selection')
+
+for i = 1:length(decoding_titles)
+
+    subplot(1,3,i)
+
+    frevede_errorbarplot(decoding_all.time, decoding_all.(motor_beta_correct{i}), linecolors{i}, 'se');
+
+    title(decoding_titles{i}); 
+    xlabel('time (s)'); ylabel('decoding accuracy');   
+
+    xline(0, '--k'); xline(1000, '--k'); yline(0.5, '--k')
+    ylim([.4 .8]); xlim([0 3500]); 
+
+end
+
+%% Plot visual (alpha)
+
+figure;
+sgtitle('Visual (alpha) selection')
+
+for i = 1:length(decoding_titles)
+
+    subplot(1,3,i)
+
+    frevede_errorbarplot(decoding.time, decoding_all.(visual_alpha_correct{i}), linecolors{i}, 'se');
+
+    title(decoding_titles{i}); 
+    xlabel('time (s)'); ylabel('decoding accuracy');   
+
+    xline(0, '--k'); xline(1000, '--k'); yline(0.5, '--k')
+    ylim([.4 .8]); xlim([0 3500]); 
 
 end

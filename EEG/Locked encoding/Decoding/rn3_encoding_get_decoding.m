@@ -4,9 +4,9 @@ clc; clear; close all
 
 %% Define parameters
 
-% subjects = [1:5,7:19,21:27];
+subjects = [3:5,7:19,21:27];
 
-subjects = 1:2;
+% subjects = 1:2;
 
 for this_subject = subjects
 
@@ -63,33 +63,40 @@ for this_subject = subjects
     cfg.demean = 'yes';
     cfg.baselinewindow = [-.25 0];
 
-    data = ft_preprocessing(cfg, data);   
+    data = ft_preprocessing(cfg, data);
+    
+    %% Band selection
 
-    %% Betaband selection
+    % Band selection
+    cfg = [];
+    cfg.bpfilter = 'yes';
+    cfg.hilbert = 'yes';
 
-    selectBetaband = false;
+    % Beta
+    cfg.bpfreq  = [13 30];
+    data_beta   = ft_preprocessing(cfg, data);
 
-    if selectBetaband
-        cfg = [];
-        cfg.bpfilter = 'yes';
-        cfg.hilbert = 'yes';
-        cfg.bpfreq = [13 30];
-        data = ft_preprocessing(cfg, data);
-    end
+    % Alpha
+    cfg.bpfreq  = [8 12];
+    data_alpha  = ft_preprocessing(cfg, data);
 
     %% Resample
 
     cfg = [];
     cfg.resamplefs = 50; 
     
-    data = ft_resampledata(cfg, data);
+    data        = ft_resampledata(cfg, data);
+    data_beta   = ft_resampledata(cfg, data_beta);
+    data_alpha  = ft_resampledata(cfg, data_alpha);
 
     %% Temporal smoothing (removing the higher frequencies)
 
     cfg = [];
     cfg.boxcar = 0.05; % smooth with 50 ms boxcar window
     
-    data = ft_preprocessing(cfg, data);
+    data        = ft_preprocessing(cfg, data);
+    data_beta   = ft_preprocessing(cfg, data_beta);
+    data_alpha  = ft_preprocessing(cfg, data_alpha);
 
     %% Select data 
     
@@ -97,8 +104,10 @@ for this_subject = subjects
     cfg.latency = [-.1 4]; % encoding window
     cfg.channel = 'EEG'; % only keep EEG electrodes
     
-    data = ft_selectdata(cfg, data);
-    
+    data        = ft_selectdata(cfg, data);
+    data_beta   = ft_selectdata(cfg, data_beta);
+    data_alpha  = ft_selectdata(cfg, data_alpha);
+
     %% Trialtypes
 
     % Load types
@@ -124,31 +133,34 @@ for this_subject = subjects
     % Required response 
     trials_reqresp_left     = trials_tilt_left & trials_dial_up | trials_tilt_right & trials_dial_right;
     trials_reqresp_right    = trials_tilt_right & trials_dial_up | trials_tilt_left & trials_dial_right;
-
+    
     %% Data into single matrix, split by condition
     
-    % Load one - T1
     cfg = [];
-    cfg.trials = trials_load_one & trials_target_T1;
     cfg.keeptrials = 'yes';
-    
-    data_one_T1 = ft_timelockanalysis(cfg, data); % put all trials into a single matrix
+
+    % Load one - T1
+    cfg.trials = trials_load_one & trials_target_T1;
+
+    data_one_T1         = ft_timelockanalysis(cfg, data);                     % put all trials into a single matrix
+    data_one_T1_beta    = ft_timelockanalysis(cfg, data_beta);
+    data_one_T1_alpha   = ft_timelockanalysis(cfg, data_alpha);
 
     % Load one - T2
-    cfg = [];
     cfg.trials = trials_load_one & trials_target_T2;
-    cfg.keeptrials = 'yes';
     
-    data_one_T2 = ft_timelockanalysis(cfg, data); % put all trials into a single matrix
+    data_one_T2         = ft_timelockanalysis(cfg, data);
+    data_one_T2_beta    = ft_timelockanalysis(cfg, data_beta);
+    data_one_T2_alpha   = ft_timelockanalysis(cfg, data_alpha);
 
     % Load two
-    cfg = [];
     cfg.trials = trials_load_two;
-    cfg.keeptrials = 'yes';
     
-    data_two = ft_timelockanalysis(cfg, data); % put all trials into a single matrix
+    data_two            = ft_timelockanalysis(cfg, data);
+    data_two_beta       = ft_timelockanalysis(cfg, data_beta);
+    data_two_alpha      = ft_timelockanalysis(cfg, data_alpha);
 
-    %% Decoding
+    %% Decoding 
 
     dtime = data.time;                                                        % Time variable
 
@@ -156,6 +168,8 @@ for this_subject = subjects
 
     % Data
     d           = data_one_T1.trial;                                          % Data
+    d_beta      = data_one_T1_beta.trial;                                     % Betaband
+    d_alpha     = data_one_T1_alpha.trial;                                    % Alphaband
     allTrials   = 1:size(data_one_T1.trial, 1);                               % Trials 
 
     % Classes
@@ -163,13 +177,17 @@ for this_subject = subjects
     visualClass = trials_item_right(trials_load_one & trials_target_T1);      % (1 for right)
     
     % Decoding
-    [decoding.motor_correct_one_T1, decoding.motor_distance_one_T1]     = eeg_decoding(d, allTrials, motorClass, dtime);
-    [decoding.visual_correct_one_T1, decoding.visual_distance_one_T1]   = eeg_decoding(d, allTrials, visualClass, dtime);
+    [decoding.motor_correct_one_T1, decoding.motor_distance_one_T1]                 = eeg_decoding(d, allTrials, motorClass, dtime);
+    [decoding.visual_correct_one_T1, decoding.visual_distance_one_T1]               = eeg_decoding(d, allTrials, visualClass, dtime);
+    [decoding.motor_beta_correct_one_T1, decoding.motor_beta_distance_one_T1]       = eeg_decoding(d_beta, allTrials, motorClass, dtime);
+    [decoding.visual_alpha_correct_one_T1, decoding.visual_alpha_distance_one_T1]   = eeg_decoding(d_alpha, allTrials, visualClass, dtime);
 
     %% Load one-T2    
 
     % Data
     d           = data_one_T2.trial;                                          % Data
+    d_beta      = data_one_T2_beta.trial;                                     % Betaband
+    d_alpha     = data_one_T2_alpha.trial;                                    % Alphaband
     allTrials   = 1:size(data_one_T2.trial, 1);                               % Trials 
 
     % Classes
@@ -177,13 +195,17 @@ for this_subject = subjects
     visualClass = trials_item_right(trials_load_one & trials_target_T2);      % (1 for right)
     
     % Decoding
-    [decoding.motor_correct_one_T2, decoding.motor_distance_one_T2]     = eeg_decoding(d, allTrials, motorClass, dtime);
-    [decoding.visual_correct_one_T2, decoding.visual_distance_one_T2]   = eeg_decoding(d, allTrials, visualClass, dtime);
+    [decoding.motor_correct_one_T2, decoding.motor_distance_one_T2]                 = eeg_decoding(d, allTrials, motorClass, dtime);
+    [decoding.visual_correct_one_T2, decoding.visual_distance_one_T2]               = eeg_decoding(d, allTrials, visualClass, dtime);
+    [decoding.motor_beta_correct_one_T2, decoding.motor_beta_distance_one_T2]       = eeg_decoding(d_beta, allTrials, motorClass, dtime);
+    [decoding.visual_alpha_correct_one_T2, decoding.visual_alpha_distance_one_T2]   = eeg_decoding(d_alpha, allTrials, visualClass, dtime);
 
     %% Load two    
     
     % Data
     d           = data_two.trial;                                             % Data
+    d_beta      = data_two_beta.trial;                                        % Betaband
+    d_alpha     = data_two_alpha.trial;                                       % Alphaband
     allTrials   = 1:size(data_two.trial, 1);                                  % Trials 
     
     % Classes
@@ -194,8 +216,10 @@ for this_subject = subjects
     visualClass      = visualClass(trials_load_two);                          % (1 for right)
 
     % Decoding
-    [decoding.motor_correct_two, decoding.motor_distance_two]       = eeg_decoding(d, allTrials, motorClass, dtime);
-    [decoding.visual_correct_two, decoding.visual_distance_two]     = eeg_decoding(d, allTrials, visualClass, dtime);
+    [decoding.motor_correct_two, decoding.motor_distance_two]                       = eeg_decoding(d, allTrials, motorClass, dtime);
+    [decoding.visual_correct_two, decoding.visual_distance_two]                     = eeg_decoding(d, allTrials, visualClass, dtime);
+    [decoding.motor_beta_correct_two, decoding.motor_beta_distance_two]             = eeg_decoding(d_beta, allTrials, motorClass, dtime);
+    [decoding.visual_alpha_correct_two, decoding.visual_alpha_distance_two]         = eeg_decoding(d_alpha, allTrials, visualClass, dtime);
 
     %% Add time variable
 
