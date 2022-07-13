@@ -6,7 +6,7 @@ clc; clear; close all
 
 % subjects = [1:5,7:19,21:27];
 
-subjects = 1;
+subjects = 1:2;
 
 for this_subject = subjects
 
@@ -129,7 +129,6 @@ for this_subject = subjects
     
     % Load one - T1
     cfg = [];
-
     cfg.trials = trials_load_one & trials_target_T1;
     cfg.keeptrials = 'yes';
     
@@ -137,7 +136,6 @@ for this_subject = subjects
 
     % Load one - T2
     cfg = [];
-
     cfg.trials = trials_load_one & trials_target_T2;
     cfg.keeptrials = 'yes';
     
@@ -145,300 +143,101 @@ for this_subject = subjects
 
     % Load two
     cfg = [];
-
     cfg.trials = trials_load_two;
     cfg.keeptrials = 'yes';
     
     data_two = ft_timelockanalysis(cfg, data); % put all trials into a single matrix
 
-    %% Decoding - motor
-    
-    %% Load one-T1    
+    %% Decoding
+
+    dtime = data.time;                                                        % Time variable
+
+    %% Load one-T1  
 
     % Data
-    d = data_one_T1.trial;
-    allTrials = 1:size(data_one_T1.trial, 1);
+    d           = data_one_T1.trial;                                          % Data
+    allTrials   = 1:size(data_one_T1.trial, 1);                               % Trials 
 
-    % Class
-    motorClass = trials_reqresp_right(trials_load_one & trials_target_T1); % 0 if left, 1 if right
-
-    for thisTrial = allTrials
-
-        disp(['decoding trial ', num2str(thisTrial), ' out of ', num2str(length(allTrials))]);
-        
-        % Test data
-        testData    = squeeze(d(thisTrial,:,:)); % Trial data
-        thisMotor   = motorClass(thisTrial); % Required response hand this trial
-        
-        % Training data
-        otherTrials     = ~ismember(allTrials, thisTrial);
-        
-        otherMatch      = otherTrials' & (motorClass == thisMotor);
-        otherNonMatch   = otherTrials' & (motorClass ~= thisMotor);
-        trainMatch      = squeeze(mean(d(otherMatch,:,:)));
-        trainNonMatch   = squeeze(mean(d(otherNonMatch,:,:)));
-
-        % Loop over timepoints
-        for time = 1:length(data.time{thisTrial})
-            covar = covdiag(squeeze(d(otherTrials,:,time))); % covariance over all others trials
-
-            distMatch         = pdist([testData(:,time)'; trainMatch(:,time)'], 'mahalanobis', covar);
-            distNonMatch      = pdist([testData(:,time)'; trainNonMatch(:,time)'], 'mahalanobis', covar);
-            
-            decoding.motor_correct_one_T1(thisTrial, time)      = distMatch < distNonMatch;
-            decoding.motor_distance_one_T1(thisTrial, time)     = distNonMatch - distMatch;
-        end
-
-    end
+    % Classes
+    motorClass  = trials_reqresp_right(trials_load_one & trials_target_T1);   % (1 for right)
+    visualClass = trials_item_right(trials_load_one & trials_target_T1);      % (1 for right)
+    
+    % Decoding
+    [decoding.motor_correct_one_T1, decoding.motor_distance_one_T1]     = eeg_decoding(d, allTrials, motorClass, dtime);
+    [decoding.visual_correct_one_T1, decoding.visual_distance_one_T1]   = eeg_decoding(d, allTrials, visualClass, dtime);
 
     %% Load one-T2    
 
     % Data
-    d = data_one_T2.trial;
-    allTrials = 1:size(data_one_T2.trial, 1);
+    d           = data_one_T2.trial;                                          % Data
+    allTrials   = 1:size(data_one_T2.trial, 1);                               % Trials 
 
-    % Class
-    motorClass = trials_reqresp_right(trials_load_one & trials_target_T2); % 0 if left, 1 if right
-
-    for thisTrial = allTrials
-
-        disp(['decoding trial ', num2str(thisTrial), ' out of ', num2str(length(allTrials))]);
-        
-        % Test data
-        testData    = squeeze(d(thisTrial,:,:)); % Trial data
-        thisMotor   = motorClass(thisTrial); % Required response hand this trial
-        
-        % Training data
-        otherTrials     = ~ismember(allTrials, thisTrial);
-        
-        otherMatch      = otherTrials' & (motorClass == thisMotor);
-        otherNonMatch   = otherTrials' & (motorClass ~= thisMotor);
-        trainMatch      = squeeze(mean(d(otherMatch,:,:)));
-        trainNonMatch   = squeeze(mean(d(otherNonMatch,:,:)));
-
-        % Loop over timepoints
-        for time = 1:length(data.time{thisTrial})
-            covar = covdiag(squeeze(d(otherTrials,:,time))); % covariance over all others trials
-
-            distMatch         = pdist([testData(:,time)'; trainMatch(:,time)'], 'mahalanobis', covar);
-            distNonMatch      = pdist([testData(:,time)'; trainNonMatch(:,time)'], 'mahalanobis', covar);
-            
-            decoding.motor_correct_one_T2(thisTrial, time)      = distMatch < distNonMatch;
-            decoding.motor_distance_one_T2(thisTrial, time)     = distNonMatch - distMatch;
-        end
-
-    end
+    % Classes
+    motorClass  = trials_reqresp_right(trials_load_one & trials_target_T2);   % (1 for right)
+    visualClass = trials_item_right(trials_load_one & trials_target_T2);      % (1 for right)
+    
+    % Decoding
+    [decoding.motor_correct_one_T2, decoding.motor_distance_one_T2]     = eeg_decoding(d, allTrials, motorClass, dtime);
+    [decoding.visual_correct_one_T2, decoding.visual_distance_one_T2]   = eeg_decoding(d, allTrials, visualClass, dtime);
 
     %% Load two    
-
-    % Data
-    d = data_two.trial;
-    allTrials = 1:size(data_two.trial, 1);
-
-    % Class
-    motorClass = trials_load_two & trials_target_T1 & trials_reqresp_right | trials_load_two & trials_target_T2 & trials_reqresp_left;
-    motorClass = motorClass(trials_load_two); % 0 if left, 1 if right
-
-    for thisTrial = allTrials
-
-        disp(['decoding trial ', num2str(thisTrial), ' out of ', num2str(length(allTrials))]);
-        
-        % Test data
-        testData    = squeeze(d(thisTrial,:,:)); % Trial data
-        thisMotor   = motorClass(thisTrial); % Required response hand this trial
-        
-        % Training data
-        otherTrials     = ~ismember(allTrials, thisTrial);
-        
-        otherMatch      = otherTrials' & (motorClass == thisMotor);
-        otherNonMatch   = otherTrials' & (motorClass ~= thisMotor);
-        trainMatch      = squeeze(mean(d(otherMatch,:,:)));
-        trainNonMatch   = squeeze(mean(d(otherNonMatch,:,:)));
-
-        % Loop over timepoints
-        for time = 1:length(data.time{thisTrial})
-            covar = covdiag(squeeze(d(otherTrials,:,time))); % covariance over all others trials
-
-            distMatch         = pdist([testData(:,time)'; trainMatch(:,time)'], 'mahalanobis', covar);
-            distNonMatch      = pdist([testData(:,time)'; trainNonMatch(:,time)'], 'mahalanobis', covar);
-            
-            decoding.motor_correct_two(thisTrial, time)      = distMatch < distNonMatch;
-            decoding.motor_distance_two(thisTrial, time)     = distNonMatch - distMatch;
-        end
-
-    end
-
-    %% Decoding - visual
     
-    %% Load one-T1    
-
     % Data
-    d = data_one_T1.trial;
-    allTrials = 1:size(data_one_T1.trial, 1);
-
-    % Class
-    visualClass = trials_item_right(trials_load_one & trials_target_T1); % 0 if left, 1 if right
-
-    for thisTrial = allTrials
-
-        disp(['decoding trial ', num2str(thisTrial), ' out of ', num2str(length(allTrials))]);
-        
-        % Test data
-        testData    = squeeze(d(thisTrial,:,:)); % Trial data
-        thisVisual   = visualClass(thisTrial); % Required response hand this trial
-        
-        % Training data
-        otherTrials     = ~ismember(allTrials, thisTrial);
-        
-        otherMatch      = otherTrials' & (visualClass == thisVisual);
-        otherNonMatch   = otherTrials' & (visualClass ~= thisVisual);
-        trainMatch      = squeeze(mean(d(otherMatch,:,:)));
-        trainNonMatch   = squeeze(mean(d(otherNonMatch,:,:)));
-
-        % Loop over timepoints
-        for time = 1:length(data.time{thisTrial})
-            covar = covdiag(squeeze(d(otherTrials,:,time))); % covariance over all others trials
-
-            distMatch         = pdist([testData(:,time)'; trainMatch(:,time)'], 'mahalanobis', covar);
-            distNonMatch      = pdist([testData(:,time)'; trainNonMatch(:,time)'], 'mahalanobis', covar);
-            
-            decoding.visual_correct_one_T1(thisTrial, time)      = distMatch < distNonMatch;
-            decoding.visual_distance_one_T1(thisTrial, time)     = distNonMatch - distMatch;
-        end
-
-    end
-
-    %% Load one-T2    
-
-    % Data
-    d = data_one_T2.trial;
-    allTrials = 1:size(data_one_T2.trial, 1);
-
-    % Class
-    visualClass = trials_item_right(trials_load_one & trials_target_T2); % 0 if left, 1 if right
-
-    for thisTrial = allTrials
-
-        disp(['decoding trial ', num2str(thisTrial), ' out of ', num2str(length(allTrials))]);
-        
-        % Test data
-        testData    = squeeze(d(thisTrial,:,:)); % Trial data
-        thisVisual   = visualClass(thisTrial); % Required response hand this trial
-        
-        % Training data
-        otherTrials     = ~ismember(allTrials, thisTrial);
-        
-        otherMatch      = otherTrials' & (visualClass == thisVisual);
-        otherNonMatch   = otherTrials' & (visualClass ~= thisVisual);
-        trainMatch      = squeeze(mean(d(otherMatch,:,:)));
-        trainNonMatch   = squeeze(mean(d(otherNonMatch,:,:)));
-
-        % Loop over timepoints
-        for time = 1:length(data.time{thisTrial})
-            covar = covdiag(squeeze(d(otherTrials,:,time))); % covariance over all others trials
-
-            distMatch         = pdist([testData(:,time)'; trainMatch(:,time)'], 'mahalanobis', covar);
-            distNonMatch      = pdist([testData(:,time)'; trainNonMatch(:,time)'], 'mahalanobis', covar);
-            
-            decoding.visual_correct_one_T2(thisTrial, time)      = distMatch < distNonMatch;
-            decoding.visual_distance_one_T2(thisTrial, time)     = distNonMatch - distMatch;
-        end
-
-    end
-
-    %% Load two   
-
-    % Data
-    d = data_two.trial;
-    allTrials = 1:size(data_two.trial, 1);
-
-    % Class
+    d           = data_two.trial;                                             % Data
+    allTrials   = 1:size(data_two.trial, 1);                                  % Trials 
+    
+    % Classes
+    motorClass  = trials_load_two & trials_target_T1 & trials_reqresp_right | trials_load_two & trials_target_T2 & trials_reqresp_left;
     visualClass = trials_load_two & trials_target_T1 & trials_item_right | trials_load_two & trials_target_T2 & trials_item_left;
-    visualClass = visualClass(trials_load_two); % 0 if left, 1 if right
-
-    for thisTrial = allTrials
-
-        disp(['decoding trial ', num2str(thisTrial), ' out of ', num2str(length(allTrials))]);
-        
-        % Test data
-        testData    = squeeze(d(thisTrial,:,:)); % Trial data
-        thisVisual   = visualClass(thisTrial); % Required response hand this trial
-        
-        % Training data
-        otherTrials     = ~ismember(allTrials, thisTrial);
-        
-        otherMatch      = otherTrials' & (visualClass == thisVisual);
-        otherNonMatch   = otherTrials' & (visualClass ~= thisVisual);
-        trainMatch      = squeeze(mean(d(otherMatch,:,:)));
-        trainNonMatch   = squeeze(mean(d(otherNonMatch,:,:)));
-
-        % Loop over timepoints
-        for time = 1:length(data.time{thisTrial})
-            covar = covdiag(squeeze(d(otherTrials,:,time))); % covariance over all others trials
-
-            distMatch         = pdist([testData(:,time)'; trainMatch(:,time)'], 'mahalanobis', covar);
-            distNonMatch      = pdist([testData(:,time)'; trainNonMatch(:,time)'], 'mahalanobis', covar);
-            
-            decoding.visual_correct_two(thisTrial, time)      = distMatch < distNonMatch;
-            decoding.visual_distance_two(thisTrial, time)     = distNonMatch - distMatch;
-        end
-
-    end
     
+    motorClass       = motorClass(trials_load_two);                           % (1 for right)
+    visualClass      = visualClass(trials_load_two);                          % (1 for right)
+
+    % Decoding
+    [decoding.motor_correct_two, decoding.motor_distance_two]       = eeg_decoding(d, allTrials, motorClass, dtime);
+    [decoding.visual_correct_two, decoding.visual_distance_two]     = eeg_decoding(d, allTrials, visualClass, dtime);
+
+    %% Add time variable
+
+    decoding.time = data.time{1}*1000;
+
     %% Save
 
     save([param.path, 'Processed/EEG/Locked encoding/decoding/' 'decoding_' param.subjectIDs{this_subject}], 'decoding');
     
 end
 
-%% Save time structure (temporary)
+%% Decoding general function
 
-time = data.time{1}*1000;
+function [accuracy, distance] = eeg_decoding(d, allTrials, class, dtime)
 
-save([param.path, 'Processed/EEG/Locked encoding/decoding/' 'time_all'], 'time');
+    for thisTrial = allTrials
 
-%% Plot decoding accuracy
+        disp(['decoding trial ', num2str(thisTrial), ' out of ', num2str(length(allTrials))]);
+        
+        % Test data
+        testData    = squeeze(d(thisTrial,:,:)); % Trial data
+        thisClass   = class(thisTrial); % Required response hand this trial
+        
+        % Training data
+        otherTrials     = ~ismember(allTrials, thisTrial);
+        
+        otherMatch      = otherTrials' & (class == thisClass);
+        otherNonMatch   = otherTrials' & (class ~= thisClass);
+        trainMatch      = squeeze(mean(d(otherMatch,:,:)));
+        trainNonMatch   = squeeze(mean(d(otherNonMatch,:,:)));
 
-time = data.time{1}*1000;
+        % Loop over timepoints
+        for time = 1:length(dtime{thisTrial})
+            covar = covdiag(squeeze(d(otherTrials,:,time))); % covariance over all others trials
 
-decoding_titles = {'Load one - T1', 'Load one - T2', 'Load two'};
+            distMatch         = pdist([testData(:,time)'; trainMatch(:,time)'], 'mahalanobis', covar);
+            distNonMatch      = pdist([testData(:,time)'; trainNonMatch(:,time)'], 'mahalanobis', covar);
+            
+            accuracy(thisTrial, time)      = distMatch < distNonMatch;
+            distance(thisTrial, time)      = distNonMatch - distMatch;
+        end
 
-motor_correct   = {decoding.motor_correct_one_T1, decoding.motor_correct_one_T2, decoding.motor_correct_two};
-motor_distance  = {decoding.motor_distance_one_T1, decoding.motor_distance_one_T2, decoding.motor_distance_two}; 
-
-visual_correct   = {decoding.visual_correct_one_T1, decoding.visual_correct_one_T2, decoding.motor_correct_two};
-visual_distance  = {decoding.visual_distance_one_T1, decoding.visual_distance_one_T2, decoding.motor_distance_two}; 
-
-figure;
-sgtitle('Motor selection')
-
-for i = 1:length(decoding_titles)
-
-    subplot(1,3,i)
-
-    plot(time, squeeze(mean(motor_correct{i}))); 
-
-    title(decoding_titles{i}); 
-    xlabel('time (s)'); ylabel('decoding accuracy');   
-
-    xline(0, '--k'); xline(1000, '--k'); yline(0.5, '--k')
-    ylim([.25 1]); xlim([0 3500]); 
-
-end
-
-figure;
-sgtitle('Visual selection')
-
-for i = 1:length(decoding_titles)
-
-    subplot(1,3,i)
-
-    plot(time, squeeze(mean(visual_correct{i}))); 
-
-    title(decoding_titles{i}); 
-    xlabel('time (s)'); ylabel('decoding accuracy');   
-
-    xline(0, '--k'); xline(1000, '--k'); yline(0.5, '--k')
-    ylim([.25 1]); xlim([0 3500]); 
+    end
 
 end

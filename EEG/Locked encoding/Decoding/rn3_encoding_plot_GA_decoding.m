@@ -46,8 +46,8 @@ decoding_titles = {'Load one - T1', 'Load one - T2', 'Load two'};
 motor_correct   = {decoding_all.motor_correct_one_T1, decoding_all.motor_correct_one_T2, decoding_all.motor_correct_two};
 motor_distance  = {decoding_all.motor_distance_one_T1, decoding_all.motor_distance_one_T2, decoding_all.motor_distance_two}; 
 
-visual_correct   = {decoding_all.visual_correct_one_T1, decoding_all.visual_correct_one_T2, decoding_all.motor_correct_two};
-visual_distance  = {decoding_all.visual_distance_one_T1, decoding_all.visual_distance_one_T2, decoding_all.motor_distance_two}; 
+visual_correct   = {decoding_all.visual_correct_one_T1, decoding_all.visual_correct_one_T2, decoding_all.visual_correct_two};
+visual_distance  = {decoding_all.visual_distance_one_T1, decoding_all.visual_distance_one_T2, decoding_all.visual_distance_two}; 
 
 linecolors = {[140/255, 69/255, 172/255],[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
 
