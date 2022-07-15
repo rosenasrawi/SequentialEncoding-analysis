@@ -4,8 +4,8 @@ clc; clear; close all
 
 %% Define parameters
 
-subjectIDs = [1:2];
-subjects = 1:2;
+subjectIDs = [1:5,7:19,21:27];
+subjects = 1:25;
 
 %% Load data files
 
@@ -89,7 +89,7 @@ end
 figure;
 sgtitle('Motor (beta) selection')
 
-for i = 1:length(decoding_titles)
+for i = 1:length(decoding_titles)   
 
     subplot(1,3,i)
 

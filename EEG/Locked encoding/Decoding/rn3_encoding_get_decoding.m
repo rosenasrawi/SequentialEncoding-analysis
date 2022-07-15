@@ -4,9 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = [3:5,7:19,21:27];
-
-% subjects = 1:2;
+subjects = [1:5,7:19,21:27];
 
 for this_subject = subjects
 
