@@ -338,8 +338,13 @@ ggplot(summary.rt.load.moment.dial,
            color = "black", width = 0.7, size = 0.4) +
   
   geom_errorbar(aes(ymin = responseTimeClean-se, ymax = responseTimeClean+se), width = 0.1, 
-                position = position_dodge(0.9), size = 0.5, color = "black") +  
+                position = position_dodge(1), size = 0.5, color = "black") +  
   
+  geom_jitter(data = summary.rt.subj.load.moment.dial, 
+              aes(group = interaction(targetMoment, loadType)), 
+              position = position_jitterdodge(dodge.width = 1, jitter.width = 0.5), 
+              color = "grey", size = 0.6) +
+
   scale_fill_manual(values = c(color_1, color_2, color_3, color_4),
                     breaks = c("One.Early", "One.Late", "Two.Early", "Two.Late"),
                     name = "Target moment",
@@ -371,6 +376,11 @@ ggplot(summary.err.load.moment.dial,
 
   geom_errorbar(aes(ymin = difference-se, ymax = difference+se), width = 0.1, 
                 position = position_dodge(0.9), size = 0.5, color = "black") +  
+  
+  geom_jitter(data = summary.err.subj.load.moment.dial, 
+              aes(group = interaction(targetMoment, loadType)), 
+              position = position_jitterdodge(dodge.width = 1, jitter.width = 0.5), 
+              color = "grey", size = 0.6) +
   
   scale_fill_manual(values = c(color_1, color_2, color_3, color_4),
                     breaks = c("One.Early", "One.Late", "Two.Early", "Two.Late"),
