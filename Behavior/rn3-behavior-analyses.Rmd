@@ -398,6 +398,61 @@ ggplot(summary.err.load.moment.dial,
   legend.theme
 
 ```
+### Precision per angle
+
+
+```{r plot prec per angle}
+
+# Change target ori to [-90 , 90]
+data$askDegree90 = data$askDegree
+data$askDegree90[data$askDegree >= 90] = data$askDegree[data$askDegree >= 90] - 180
+
+# Change report ori to [-90 , 90]
+data$repDegree90 = data$repDegree
+data$repDegree90[data$repDegree >= 90] = data$repDegree[data$repDegree >= 90] - 180
+
+# Bin data
+tilt_bins = rbind(c(seq(-85,-25,20), seq(5,65,20)), c(seq(-65,-5,20), seq(25,85,20)))
+
+nbins = dim(tilt_bins)[2]
+data$askDegree90Steps = data$askDegree90
+bin_titles = c()
+
+for (b in 1:nbins) {
+  this_bin = tilt_bins[,b]
+  data_bin = data$askDegree90 >= this_bin[1] & data$askDegree90 <= this_bin[2]
+  data$TargetOri90Steps[data_bin] = b
+  bin_titles[b] = paste(as.character(this_bin[1]), "to", as.character(this_bin[2]))
+}
+
+precision_density = data.frame(Target = as.factor(data$TargetOri90Steps), Report = data$repDegree90)
+
+# Plot
+
+colfunc <- colorRampPalette(c("blue3", "white"))
+blue_grad = colfunc(round(nbins/2)+2)
+blue_grad = blue_grad[-c(round(nbins/2)+2, round(nbins/2)+1)]
+
+colfunc <- colorRampPalette(c("white", "red3"))
+red_grad = colfunc(nbins-round(nbins/2)+2)
+red_grad = red_grad[-c(1,2)]
+
+blue_red = c(blue_grad, red_grad)
+
+ggplot(precision_density, aes(x=Report, color=Target)) +
+  
+  geom_density(show.legend = FALSE) + 
+  stat_density(geom = "line", position = "identity", size = 0.8) + 
+  scale_color_manual(labels = bin_titles, values = blue_red)+
+  scale_x_continuous("Reported orientation") +
+  scale_y_continuous("Response density") +
+  
+  theme_bw() +
+  text.theme +
+  legend.theme +
+  guides(colour = guide_legend(override.aes=list(size=0.5)))
+
+```
 
 # ANOVA: load x moment x dial
 
