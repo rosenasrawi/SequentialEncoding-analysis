@@ -126,6 +126,46 @@ for i = 1:length(timecourse_titles)
 
 end
 
+%% split by dial
+
+linecolors_up       = {[140/255, 69/255, 172/255],[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
+linecolors_right    = {[198/255, 160/255, 203/255],[198/255, 160/255, 203/255],[167/255, 216/255, 188/255]};
+
+fn = fieldnames(cvsi_encoding_all);
+
+cvsi_motor_beta_dial_up = fn(contains(fn, 'cvsi_motor') & contains(fn, 'dial_up'));
+cvsi_motor_beta_dial_right = fn(contains(fn, 'cvsi_motor') & contains(fn, 'dial_right'));
+
+for i = 1:length(cvsi_motor_beta_dial_up)
+    
+    beta = cvsi_encoding_all.(cvsi_motor_beta_dial_up{i});
+    cvsi_motor_beta_dial_up{i} = squeeze(mean(squeeze(beta(:,:,beta_index,:)),2));
+    
+    beta = cvsi_encoding_all.(cvsi_motor_beta_dial_right{i});
+    cvsi_motor_beta_dial_right{i} = squeeze(mean(squeeze(beta(:,:,beta_index,:)),2));
+
+end
+
+figure;
+
+for i = 1:length(timecourse_titles)
+    
+    subplot(1,3,i)
+    
+    frevede_errorbarplot(mean_cvsi_encoding_all.time, cvsi_motor_beta_dial_up{i}, linecolors_up{i}, 'se');
+    hold on
+    frevede_errorbarplot(mean_cvsi_encoding_all.time, cvsi_motor_beta_dial_right{i}, linecolors_right{i}, 'se');
+
+%     plot(mean_cvsi_encoding_all.time, stat_motor_beta{i} * -0.3, 'k', 'LineWidth', 2);
+    
+    xline(0); xline(1); xline(3); yline(0)
+    xlim([0 3]); ylim(ylims{i})
+    title(timecourse_titles{i})
+
+end
+
+
+
 %% post-encoding timecourse
 cvsi_motor_beta_postenc = {(cvsi_motor_beta{1}(:,T1_index) + cvsi_motor_beta{2}(:,T2_index)) / 2, cvsi_motor_beta{3}(:,T1_index)};
 
@@ -172,7 +212,7 @@ cfg.zlim      = 'maxabs';
 cfg.ylim      = [13 30];
 cfg.comment   = 'no';
 cfg.style     = 'straight';
-cfg.colorbar  = 'no';    
+cfg.colorbar  = 'yes';    
 
 for contrast = 1:length(time_select)    
     cfg.parameter = topo_contrasts{contrast};
@@ -211,7 +251,7 @@ for contrast = 1:length(topo_contrasts)
     cfg.ylim      = [13 30];
     cfg.comment   = 'no';
     cfg.style     = 'straight';
-    cfg.colorbar  = 'no'; 
+    cfg.colorbar  = 'yes'; 
     cfg.parameter = topo_contrasts{contrast};
     
     for time = 1:length(time_select{1})
