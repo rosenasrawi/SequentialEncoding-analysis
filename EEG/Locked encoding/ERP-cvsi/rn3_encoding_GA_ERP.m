@@ -4,8 +4,8 @@ clc; clear; close all
 
 %% Define parameters
 
-subjectIDs = [1:5,7:19,21:27];
-subjects = 1:25;
+subjectIDs = [1:5,7:15];%19,21:27];
+subjects = 1:14;%25;
 
 %% Load data files
 
