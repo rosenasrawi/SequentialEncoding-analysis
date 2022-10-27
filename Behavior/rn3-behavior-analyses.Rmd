@@ -167,6 +167,60 @@ data$precImprec = precImprec
 
 ```
 
+## T1/T2 stay/switch
+
+```{r moment stay/switch}
+
+# define blocks
+
+ntrials = 32
+nblocks = sum(data$subjectID == 's01')/ntrials
+
+block = c()
+for (b in 1:nblocks) {block = append(block, rep(b, ntrials))}
+
+
+# define stay/switch for each sub
+
+stay_switch = c()
+
+for (sID in subjectIDs){
+  
+  sub_dat = data[data$subjectID == sID, ]
+  sub_dat$block = block
+  
+  
+  for (b in 1:nblocks){
+    
+    block_dat = sub_dat[block == b,]
+    
+    for (t in 1:ntrials){
+      
+      if (t == 1) {stay_switch = append(stay_switch, NA)} 
+      
+      else {
+        if (block_dat$targetMoment[t] == block_dat$targetMoment[t-1]) {
+          stay_switch = append(stay_switch, 'stay')
+        } else {
+          stay_switch = append(stay_switch, 'switch') }
+        
+      }
+    }
+  }
+}
+
+data$staySwitch = stay_switch
+
+# Summarize
+
+summary.rt.subj.load.moment.switch = aggregate(data = data, responseTimeClean ~ subjectID + loadType + targetMoment + staySwitch, mean)
+
+summary.rt.load.moment.switch = summarySEwithin(data = summary.rt.subj.load.moment.switch,
+                                                measurevar = "responseTimeClean",
+                                                withinvars = c("dialType", "loadType", "targetMoment"),
+                                                idvar = "subjectID")
+
+```
 
 ## Save data
 
@@ -174,6 +228,8 @@ data$precImprec = precImprec
 write.csv(data, '/Users/rosenasrawi/Documents/VU PhD/Projects/rn3 - Sequential encoding/Data/Processed/Behavior/logfiles_combined_rn3.csv', row.names=FALSE, quote=FALSE) 
 
 ```
+
+
 
 ## Summarise the data
 
