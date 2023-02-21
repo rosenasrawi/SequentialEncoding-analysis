@@ -217,7 +217,14 @@ summary.rt.subj.load.moment.switch = aggregate(data = data, responseTimeClean ~ 
 
 summary.rt.load.moment.switch = summarySEwithin(data = summary.rt.subj.load.moment.switch,
                                                 measurevar = "responseTimeClean",
-                                                withinvars = c("dialType", "loadType", "targetMoment"),
+                                                withinvars = c("loadType", "targetMoment", "staySwitch"),
+                                                idvar = "subjectID")
+
+summary.err.subj.load.moment.switch = aggregate(data = data, difference ~ subjectID + loadType + targetMoment + staySwitch, mean)
+
+summary.err.load.moment.switch = summarySEwithin(data = summary.err.subj.load.moment.switch,
+                                                measurevar = "difference",
+                                                withinvars = c("loadType", "targetMoment", "staySwitch"),
                                                 idvar = "subjectID")
 
 ```
@@ -482,6 +489,7 @@ for (b in 1:nbins) {
 }
 
 precision_density = data.frame(Target = as.factor(data$TargetOri90Steps), Report = data$repDegree90)
+precision_density$loadType = data$loadType
 
 # Plot
 
@@ -502,6 +510,8 @@ ggplot(precision_density, aes(x=Report, color=Target)) +
   scale_color_manual(labels = bin_titles, values = blue_red)+
   scale_x_continuous("Reported orientation") +
   scale_y_continuous("Response density") +
+  
+  facet_grid(~loadType, scales = 'free_x')+
   
   theme_bw() +
   text.theme +
