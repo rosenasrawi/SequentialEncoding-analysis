@@ -41,6 +41,16 @@ stat_encoding.motor_alpha_load_one_T1   = frevede_ftclusterstat1D(statcfg, cvsi_
 stat_encoding.motor_alpha_load_one_T2   = frevede_ftclusterstat1D(statcfg, cvsi_motor_alpha{2}, data_zero);
 stat_encoding.motor_alpha_load_two      = frevede_ftclusterstat1D(statcfg, cvsi_motor_alpha{3}, data_zero);
 
+%% Visual alpha
+
+cvsi_visual_alpha                        = {squeeze(mean(squeeze(cvsi_encoding_all.cvsi_visual_load_one_T1(:,:,alpha_index,:)),2)), squeeze(mean(squeeze(cvsi_encoding_all.cvsi_visual_load_one_T2(:,:,alpha_index,:)),2)), squeeze(mean(squeeze(cvsi_encoding_all.cvsi_visual_load_two(:,:,alpha_index,:)),2))};
+
+% Run stats (1D)
+
+stat_encoding.visual_alpha_load_one_T1   = frevede_ftclusterstat1D(statcfg, cvsi_visual_alpha{1}, data_zero);
+stat_encoding.visual_alpha_load_one_T2   = frevede_ftclusterstat1D(statcfg, cvsi_visual_alpha{2}, data_zero);
+stat_encoding.visual_alpha_load_two      = frevede_ftclusterstat1D(statcfg, cvsi_visual_alpha{3}, data_zero);
+
 %% Alpha-mu-beta response
 
 alpha_mu_beta_index                             = cvsi_encoding_all.freq >= param.alphaband(1) & cvsi_encoding_all.freq <= param.betaband(2);
@@ -75,6 +85,15 @@ data_zero                         = zeros(size(cvsi_motor{1}));
 stat_encoding.motor_load_one_T1   = frevede_ftclusterstat2D(statcfg, cvsi_motor{1}, data_zero);
 stat_encoding.motor_load_one_T2   = frevede_ftclusterstat2D(statcfg, cvsi_motor{2}, data_zero);
 stat_encoding.motor_load_two      = frevede_ftclusterstat2D(statcfg, cvsi_motor{3}, data_zero);
+
+%% Visual 
+
+cvsi_visual                       = {squeeze(cvsi_encoding_all.cvsi_visual_load_one_T1(:,:,freq_index,time_index)), squeeze(cvsi_encoding_all.cvsi_visual_load_one_T2(:,:,freq_index,time_index)), squeeze(cvsi_encoding_all.cvsi_visual_load_two(:,:,freq_index,time_index))};
+data_zero                         = zeros(size(cvsi_visual{1}));
+
+stat_encoding.visual_load_one_T1   = frevede_ftclusterstat2D(statcfg, cvsi_visual{1}, data_zero);
+stat_encoding.visual_load_one_T2   = frevede_ftclusterstat2D(statcfg, cvsi_visual{2}, data_zero);
+stat_encoding.visual_load_two      = frevede_ftclusterstat2D(statcfg, cvsi_visual{3}, data_zero);
 
 %% Save
 
