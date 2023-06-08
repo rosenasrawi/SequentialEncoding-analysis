@@ -32,17 +32,15 @@ complete_label = cvsi_encoding.label;
 % C3
 C3_label = mean_cvsi_encoding_all.label;
 
-%% --------------------- MOTOR ---------------------
+%% TFR
 
-%% ----- TFR -----
-
-%% Dials collapsed
+%% Motor
 
 titles_enc_contrasts = {'load one - T1', 'load one - T2', 'load two'};
 enc_contrasts = {'cvsi_motor_load_one_T1', 'cvsi_motor_load_one_T2', 'cvsi_motor_load_two'};
 enc_masks = {'mask_motor_load_one_T1', 'mask_motor_load_one_T2', 'mask_motor_load_two'};
 
-zlims = {[-10,10], [-10,10], [-5,5]}
+zlims = {[-10,10], [-10,10], [-5,5]};
 
 figure;
 cfg = [];
@@ -67,35 +65,56 @@ for contrast = 1:length(enc_contrasts)
     title(titles_enc_contrasts{contrast})
 end
 
-%% Dial up vs right
-titles_enc_contrasts = {'cvsi motor - load1-T1 - dial up', 'cvsi motor - load1-T2 - dial up', 'cvsi motor - load2 - dial up', 'cvsi motor - load1-T1 - dial right', 'cvsi motor - load1-T2 - dial right', 'cvsi motor - load2 - dial right'};
-enc_contrasts = {mean_cvsi_encoding_all.cvsi_motor_load_one_T1_dial_up, mean_cvsi_encoding_all.cvsi_motor_load_one_T2_dial_up, mean_cvsi_encoding_all.cvsi_motor_load_two_dial_up, mean_cvsi_encoding_all.cvsi_motor_load_one_T1_dial_right, mean_cvsi_encoding_all.cvsi_motor_load_one_T2_dial_right, mean_cvsi_encoding_all.cvsi_motor_load_two_dial_right};
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 1500 300]);
 
-cfg = []; cfg.colorbar = 'no';
-cfg.zlim = {[-10,10], [-10,10], [-5,5], [-10,10], [-10,10], [-5,5]};
+%% Save fig
+
+saveas(gcf, [param.figpath 'TFR-cvsi/TFR-motor'], 'epsc');
+saveas(gcf, [param.figpath 'TFR-cvsi/TFR-motor'], 'png');
+
+%% Visual
+
+titles_enc_contrasts = {'load one - T1', 'load one - T2', 'load two'};
+enc_contrasts = {'cvsi_visual_load_one_T1', 'cvsi_visual_load_one_T2', 'cvsi_visual_load_two'};
+enc_masks = {'mask_visual_load_one_T1', 'mask_visual_load_one_T2', 'mask_visual_load_two'};
+
+zlims = {[-15,15], [-15,15], [-15,15]};
 
 figure;
+cfg = [];
+
+cfg.figure    = "gcf";
+cfg.channel   = 'C3';
+cfg.colorbar  = 'no';
+cfg.maskstyle = 'outline';
 
 for contrast = 1:length(enc_contrasts)
-    subplot(1, length(enc_contrasts), contrast);   %(this_subject-1)*length(enc_contrasts)+contrast  % subplot_add(this_subject)+contrast)
-
-    colormap(flipud(brewermap(100,'RdBu')));
-
-    data2plot = squeeze(enc_contrasts{contrast}); % select data
-    contourf(mean_cvsi_encoding_all.time, mean_cvsi_encoding_all.freq, data2plot, 500, 'linecolor', 'none'); % this instead of ft_singleplotTFR
-    xline(0)
-    xline(1)
-    xline(3)
-
+    subplot(1, length(enc_contrasts), contrast);   
+    
+    cfg.parameter       = enc_contrasts{contrast};
+    cfg.maskparameter   = enc_masks{contrast};
+    cfg.zlim            = zlims{contrast};
+    
+    ft_singleplotTFR(cfg, mean_cvsi_encoding_all);
+    colormap(flipud(brewermap(100,'RdBu')));  
+    xline(0); xline(1); xline(3)
+    
+    xlim([0 3]); ylim([4 31])
     title(titles_enc_contrasts{contrast})
+end
 
-    caxis(cfg.zlim{contrast})
-    colorbar
-end    
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 1500 300]);
 
-%% ----- time-course -----
+%% Save fig
 
-%% Motor 13-30 (both dials)
+saveas(gcf, [param.figpath 'TFR-cvsi/TFR-visual'], 'epsc');
+saveas(gcf, [param.figpath 'TFR-cvsi/TFR-visual'], 'png');
+
+%% Time-courses
+
+%% Motor (13-30Hz)
 
 %% stat mask
 stat_motor_beta = {double(stat_encoding.motor_beta_load_one_T1.mask), double(stat_encoding.motor_beta_load_one_T2.mask), double(stat_encoding.motor_beta_load_two.mask)};
@@ -111,7 +130,7 @@ cvsi_motor_beta = {squeeze(mean(squeeze(cvsi_encoding_all.cvsi_motor_load_one_T1
 
 linecolors = {[140/255, 69/255, 172/255],[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
 ylims = {[-10,10],[-10,10],[-5,5]};
-figure; %sgtitle("motor 13-30 Hz")
+figure;
 
 for i = 1:length(timecourse_titles)
     
@@ -126,37 +145,38 @@ for i = 1:length(timecourse_titles)
 
 end
 
-%% split by dial
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 1500 300]);
 
-linecolors_up       = {[140/255, 69/255, 172/255],[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
-linecolors_right    = {[198/255, 160/255, 203/255],[198/255, 160/255, 203/255],[167/255, 216/255, 188/255]};
+%% Save fig
 
-fn = fieldnames(cvsi_encoding_all);
+saveas(gcf, [param.figpath 'TFR-cvsi/new/TC-motor'], 'epsc');
+saveas(gcf, [param.figpath 'TFR-cvsi/new/TC-motor'], 'png');
 
-cvsi_motor_beta_dial_up = fn(contains(fn, 'cvsi_motor') & contains(fn, 'dial_up'));
-cvsi_motor_beta_dial_right = fn(contains(fn, 'cvsi_motor') & contains(fn, 'dial_right'));
+%% Visual (8-12Hz)
 
-for i = 1:length(cvsi_motor_beta_dial_up)
-    
-    beta = cvsi_encoding_all.(cvsi_motor_beta_dial_up{i});
-    cvsi_motor_beta_dial_up{i} = squeeze(mean(squeeze(beta(:,:,beta_index,:)),2));
-    
-    beta = cvsi_encoding_all.(cvsi_motor_beta_dial_right{i});
-    cvsi_motor_beta_dial_right{i} = squeeze(mean(squeeze(beta(:,:,beta_index,:)),2));
+%% stat mask
+stat_visual_alpha = {double(stat_encoding.visual_alpha_load_one_T1.mask), double(stat_encoding.visual_alpha_load_one_T2.mask), double(stat_encoding.visual_alpha_load_two.mask)};
 
+for i = 1:length(stat_visual_alpha)
+    x = stat_visual_alpha{i};
+    x(x==0) = nan;
+    stat_visual_alpha{i} = x;
 end
 
+%% full time
+cvsi_visual_alpha = {squeeze(mean(squeeze(cvsi_encoding_all.cvsi_visual_load_one_T1(:,:,alpha_index,:)),2)), squeeze(mean(squeeze(cvsi_encoding_all.cvsi_visual_load_one_T2(:,:,alpha_index,:)),2)), squeeze(mean(squeeze(cvsi_encoding_all.cvsi_visual_load_two(:,:,alpha_index,:)),2))};
+
+linecolors = {[140/255, 69/255, 172/255],[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
+ylims = {[-20,20],[-20,20],[-20,20]};
 figure;
 
 for i = 1:length(timecourse_titles)
     
     subplot(1,3,i)
+    frevede_errorbarplot(mean_cvsi_encoding_all.time, cvsi_visual_alpha{i}, linecolors{i}, 'se');
     
-    frevede_errorbarplot(mean_cvsi_encoding_all.time, cvsi_motor_beta_dial_up{i}, linecolors_up{i}, 'se');
-    hold on
-    frevede_errorbarplot(mean_cvsi_encoding_all.time, cvsi_motor_beta_dial_right{i}, linecolors_right{i}, 'se');
-
-%     plot(mean_cvsi_encoding_all.time, stat_motor_beta{i} * -0.3, 'k', 'LineWidth', 2);
+    plot(mean_cvsi_encoding_all.time, stat_visual_alpha{i} * -0.3, 'k', 'LineWidth', 2);
     
     xline(0); xline(1); xline(3); yline(0)
     xlim([0 3]); ylim(ylims{i})
@@ -164,197 +184,91 @@ for i = 1:length(timecourse_titles)
 
 end
 
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 1500 300]);
 
+%% Save fig
 
-%% post-encoding timecourse
-cvsi_motor_beta_postenc = {(cvsi_motor_beta{1}(:,T1_index) + cvsi_motor_beta{2}(:,T2_index)) / 2, cvsi_motor_beta{3}(:,T1_index)};
+saveas(gcf, [param.figpath 'TFR-cvsi/new/TC-visual'], 'epsc');
+saveas(gcf, [param.figpath 'TFR-cvsi/new/TC-visual'], 'png');
 
-postenc_titles = {'load one', 'load two'};
-linecolors = {[140/255, 69/255, 172/255],[80/255, 172/255, 123/255]};
-
-figure;
-
-frevede_errorbarplot(mean_cvsi_encoding_all.time(T1_index), cvsi_motor_beta_postenc{1}, linecolors{1}, 'se');
-hold on 
-frevede_errorbarplot(mean_cvsi_encoding_all.time(T1_index), cvsi_motor_beta_postenc{2}, linecolors{2}, 'se');
-
-xline(0); xline(1); yline(0)
-xlim([0 1.2]); ylim([-5 5])
-
-% %% post-encoding bargraph
-% 
-% mean_cvsi_motor_beta_postenc = [];
-% 
-% for contrast = 1:length(cvsi_motor_beta)
-%     
-%     mean_cvsi_motor_beta_postenc = [mean_cvsi_motor_beta_postenc, mean(cvsi_motor_beta{contrast}(:,T1_enc_index),2)];
-%     mean_cvsi_motor_beta_postenc = [mean_cvsi_motor_beta_postenc, mean(cvsi_motor_beta{contrast}(:,T2_enc_index),2)];
-%     
-% end    
-% mean_cvsi_motor_beta_postenc = [zeros(1,size(mean_cvsi_motor_beta_postenc,2)); mean_cvsi_motor_beta_postenc];
-% header = {'load1-T1-T1', 'load1-T1-T2', 'load1-T2-T1', 'load1-T2-T2', 'load2-T1', 'load2-T2'};
-% 
-% writematrix(mean_cvsi_motor_beta_postenc, [param.path 'Processed/EEG/Locked encoding/timecourse average/mean_cvsi_motor_beta_postenc.csv'] ) 
-% writecell(header, [param.path 'Processed/EEG/Locked encoding/timecourse average/header_mean_cvsi_motor_beta_postenc.csv'] ) 
-
-%% ----- topography -----
-
-mean_cvsi_encoding_all.label = complete_label;
-topo_contrasts = {'rvsl_resp_load_one_T1','rvsl_resp_load_one_T2','rvsl_resp_load_two'};
-time_select = {[0.5 3], [1.5 3], [0.5 1]};
-
-figure;
-
-cfg = [];
-
-cfg.layout    = 'easycapM1.mat';
-cfg.zlim      = 'maxabs';
-cfg.ylim      = [13 30];
-cfg.comment   = 'no';
-cfg.style     = 'straight';
-cfg.colorbar  = 'yes';    
-
-for contrast = 1:length(time_select)    
-    cfg.parameter = topo_contrasts{contrast};
-    cfg.xlim      = time_select{contrast};
-
-    subplot(1,3,contrast);
-    ft_topoplotTFR(cfg, mean_cvsi_encoding_all);
-    colormap(flipud(brewermap(100,'RdBu')));
-    
-    title(titles_enc_contrasts{contrast}, 'FontSize', 14,  'FontWeight', 'normal', 'Position', [0, -1, 0]);
-
-end
-
-%% using time-course clusters
-
-% Eye-balling clusters
-% [cvsi_encoding_all.time;stat_motor_beta{1}]
-% [cvsi_encoding_all.time;stat_motor_beta{2}]
-% [cvsi_encoding_all.time;stat_motor_beta{3}]
+%% Topography
 
 mean_cvsi_encoding_all.label = complete_label;
 
-topo_contrasts = {'rvsl_resp_load_one_T1','rvsl_resp_load_one_T2','rvsl_resp_load_two'};
-time_select = {{[0.7 1], [2.15 3]}, {[1.5 1.7], [2.2 3]}, {[0.6 0.8], [2 3]}};
-time_titles = {'post-encoding','pre-probe'};
+%% Motor
+
+topo_contrasts = {'rvsl_resp_load_one_T1', 'rvsl_resp_load_one_T1', 'rvsl_resp_load_one_T2', 'rvsl_resp_load_one_T2', 'rvsl_resp_load_two'};
+time_select = {[0.7 1], [2.15 3], [1.5 1.7], [2.2 3], [0.6 0.8]}; % Time-course cluster timings
+load = {'one-t1-enc', 'one-t1-prep', 'one-t2-enc', 'one-t2-prep', 'two-t1'};
+
+figure;
+
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 1250 250]);
 
 for contrast = 1:length(topo_contrasts)  
-    
-    figure;
-    sgtitle(titles_enc_contrasts{contrast});
+   
+    subplot(1,5,contrast)
+    title(load{contrast});
     
     cfg = [];
 
     cfg.layout    = 'easycapM1.mat';
     cfg.zlim      = 'maxabs';
     cfg.ylim      = [13 30];
+    cfg.xlim      = time_select{contrast};
+
     cfg.comment   = 'no';
     cfg.style     = 'straight';
-    cfg.colorbar  = 'yes'; 
+    cfg.colorbar  = 'no'; 
     cfg.parameter = topo_contrasts{contrast};
     
-    for time = 1:length(time_select{1})
-        cfg.xlim      = time_select{contrast}{time};
+    ft_topoplotTFR(cfg, mean_cvsi_encoding_all);
+    colormap(flipud(brewermap(100,'RdBu')));
 
-        subplot(1,2,time);
-        ft_topoplotTFR(cfg, mean_cvsi_encoding_all);
-        colormap(flipud(brewermap(100,'RdBu')));
-    
-        title(time_titles{time}, 'FontSize', 14,  'FontWeight', 'normal', 'Position', [0, -1, 0]);
-    end
 end
 
+%% Save
 
+saveas(gcf, [param.figpath 'TFR-cvsi/new/topo-motor'], 'epsc');
+saveas(gcf, [param.figpath 'TFR-cvsi/new/topo-motor'], 'png');
 
-%% --------------------- Visual --------------------- 
+%% Visual
 
-%% ----- TFR -----
-
-%% Dials collapsed
-
-titles_enc_contrasts = {'cvsi visual - load1-T1', 'cvsi visual - load1-T2', 'cvsi visual - load2'};
-enc_contrasts = {mean_cvsi_encoding_all.cvsi_visual_load_one_T1, mean_cvsi_encoding_all.cvsi_visual_load_one_T2, mean_cvsi_encoding_all.cvsi_visual_load_two};
-
-if masked
-    enc_contrasts_sub = {cvsi_encoding_all.cvsi_visual_load_one_T1, cvsi_encoding_all.cvsi_visual_load_one_T2, cvsi_encoding_all.cvsi_visual_load_two};
-    for c = 1:length(enc_contrasts)
-        enc_contrasts{c} = enc_contrasts{c} .* squeeze(ttest(enc_contrasts_sub{c}));
-    end
-end    
-
-cfg = [];
-cfg.colorbar = 'no';
-cfg.zlim = [-10,10];
+topo_contrasts = {'rvsl_item_load_one_T1','rvsl_item_load_one_T2','rvsl_item_load_two', 'rvsl_item_load_two'};
+time_select = {[0.35 1.05], [1.35 2.3], [0.35 1.05], [1.35 2.45]}; % Time-course cluster timings
+load = {'one-t1', 'one-t1', 'two-t1', 'two-t2'};
 
 figure;
 
-for contrast = 1:length(enc_contrasts)
-    subplot(1, length(enc_contrasts), contrast);   %(this_subject-1)*length(enc_contrasts)+contrast  % subplot_add(this_subject)+contrast)
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 1000 250]);
 
-    colormap(flipud(brewermap(100,'RdBu')));
-
-    data2plot = squeeze(enc_contrasts{contrast}); % select data
-    contourf(mean_cvsi_encoding_all.time, mean_cvsi_encoding_all.freq, data2plot, 500, 'linecolor', 'none'); % this instead of ft_singleplotTFR
-    xline(0)
-    xline(1)
-    xline(3)
-
-    title(titles_enc_contrasts{contrast})
-
-    caxis(cfg.zlim)
-    colorbar
-end    
-
-%% Dial up vs right
-titles_enc_contrasts = {'cvsi visual - load1-T1 - dial up', 'cvsi visual - load1-T2 - dial up', 'cvsi visual - load2 - dial up', 'cvsi visual - load1-T1 - dial right', 'cvsi visual - load1-T2 - dial right', 'cvsi visual - load2 - dial right'};
-enc_contrasts = {mean_cvsi_encoding_all.cvsi_visual_load_one_T1_dial_up, mean_cvsi_encoding_all.cvsi_visual_load_one_T2_dial_up, mean_cvsi_encoding_all.cvsi_visual_load_two_dial_up, mean_cvsi_encoding_all.cvsi_visual_load_one_T1_dial_right, mean_cvsi_encoding_all.cvsi_visual_load_one_T2_dial_right, mean_cvsi_encoding_all.cvsi_visual_load_two_dial_right};
-
-if masked
-    enc_contrasts_sub = {cvsi_encoding_all.cvsi_visual_load_one_T1_dial_up, cvsi_encoding_all.cvsi_visual_load_one_T2_dial_up, cvsi_encoding_all.cvsi_visual_load_two_dial_up, cvsi_encoding_all.cvsi_visual_load_one_T1_dial_right, cvsi_encoding_all.cvsi_visual_load_one_T2_dial_right, cvsi_encoding_all.cvsi_visual_load_two_dial_right};
-    for c = 1:length(enc_contrasts)
-        enc_contrasts{c} = enc_contrasts{c} .* squeeze(ttest(enc_contrasts_sub{c}));
-    end
-end 
-
-cfg = [];
-cfg.colorbar = 'no';
-cfg.zlim = [-10,10];
-
-figure;
-
-for contrast = 1:length(enc_contrasts)
-    subplot(1, length(enc_contrasts), contrast);   %(this_subject-1)*length(enc_contrasts)+contrast  % subplot_add(this_subject)+contrast)
-
-    colormap(flipud(brewermap(100,'RdBu')));
-
-    data2plot = squeeze(enc_contrasts{contrast}); % select data
-    contourf(mean_cvsi_encoding_all.time, mean_cvsi_encoding_all.freq, data2plot, 500, 'linecolor', 'none'); % this instead of ft_singleplotTFR
-    xline(0)
-    xline(1)
-    xline(3)
-
-    title(titles_enc_contrasts{contrast})
-
-    caxis(cfg.zlim)
-    colorbar
-end    
-
-%% ----- time-course -----
-
-%% Visual 8-12 (both dials)
-
-cvsi_visual_alpha = {squeeze(mean(squeeze(cvsi_encoding_all.cvsi_visual_load_one_T1(:,:,alpha_index,:)),2)), squeeze(mean(squeeze(cvsi_encoding_all.cvsi_visual_load_one_T2(:,:,alpha_index,:)),2)), squeeze(mean(squeeze(cvsi_encoding_all.cvsi_visual_load_two(:,:,alpha_index,:)),2))};
-linecolors = {'blue','red','black'};
-
-figure; sgtitle("motor alpha")
-
-for i = 1:length(timecourse_titles)
+for contrast = 1:length(topo_contrasts)  
     
-    subplot(1,3,i)
-    frevede_errorbarplot(mean_cvsi_encoding_all.time, cvsi_visual_alpha{i}, linecolors{i}, 'se');
-    xline(0); xline(1); xline(3); yline(0)
-    xlim([-0.5 3.5]); ylim([-20 20])
-    title(timecourse_titles{i})
+    subplot(1,4,contrast);
+
+    title(load{contrast});
+    
+    cfg = [];
+
+    cfg.layout    = 'easycapM1.mat';
+    cfg.zlim      = 'maxabs';
+    cfg.ylim      = [8 12];
+    cfg.xlim      = time_select{contrast};
+
+    cfg.comment   = 'no';
+    cfg.style     = 'straight';
+    cfg.colorbar  = 'no'; 
+    cfg.parameter = topo_contrasts{contrast};
+
+    ft_topoplotTFR(cfg, mean_cvsi_encoding_all);
+    colormap(flipud(brewermap(100,'RdBu')));
 
 end
+
+%% Save
+
+saveas(gcf, [param.figpath 'TFR-cvsi/new/topo-visual'], 'epsc');
+saveas(gcf, [param.figpath 'TFR-cvsi/new/topo-visual'], 'png');
