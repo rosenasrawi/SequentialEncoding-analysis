@@ -488,11 +488,6 @@ for (b in 1:nbins) {
   bin_titles[b] = paste(as.character(this_bin[1]), "to", as.character(this_bin[2]))
 }
 
-precision_density = data.frame(Target = as.factor(data$TargetOri90Steps), Report = data$repDegree90)
-precision_density$loadType = data$loadType
-
-# Plot
-
 colfunc <- colorRampPalette(c("blue3", "white"))
 blue_grad = colfunc(round(nbins/2)+2)
 blue_grad = blue_grad[-c(round(nbins/2)+2, round(nbins/2)+1)]
@@ -502,6 +497,12 @@ red_grad = colfunc(nbins-round(nbins/2)+2)
 red_grad = red_grad[-c(1,2)]
 
 blue_red = c(blue_grad, red_grad)
+```
+
+```{r plot prec per angle, load}
+
+precision_density = data.frame(Target = as.factor(data$TargetOri90Steps), Report = data$repDegree90)
+precision_density$loadType = data$loadType
 
 ggplot(precision_density, aes(x=Report, color=Target)) +
   
@@ -512,6 +513,26 @@ ggplot(precision_density, aes(x=Report, color=Target)) +
   scale_y_continuous("Response density") +
   
   facet_grid(~loadType, scales = 'free_x')+
+  
+  theme_bw() +
+  text.theme +
+  legend.theme +
+  guides(colour = guide_legend(override.aes=list(size=0.5)))
+
+```
+```{r plot prec per angle, target moment}
+
+precision_density$targetMoment = data$targetMoment
+
+ggplot(precision_density, aes(x=Report, color=Target)) +
+  
+  geom_density(show.legend = FALSE) + 
+  stat_density(geom = "line", position = "identity", size = 0.8) + 
+  scale_color_manual(labels = bin_titles, values = blue_red)+
+  scale_x_continuous("Reported orientation") +
+  scale_y_continuous("Response density") +
+  
+  facet_wrap(~targetMoment + loadType, scales = 'free_x', nrow = 2)+
   
   theme_bw() +
   text.theme +

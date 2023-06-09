@@ -176,7 +176,7 @@ for i = 1:length(timecourse_titles)
     subplot(1,3,i)
     frevede_errorbarplot(mean_cvsi_encoding_all.time, cvsi_visual_alpha{i}, linecolors{i}, 'se');
     
-    plot(mean_cvsi_encoding_all.time, stat_visual_alpha{i} * -0.3, 'k', 'LineWidth', 2);
+    plot(mean_cvsi_encoding_all.time, stat_visual_alpha{i} * -1, 'k', 'LineWidth', 2);
     
     xline(0); xline(1); xline(3); yline(0)
     xlim([0 3]); ylim(ylims{i})
