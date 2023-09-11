@@ -17,56 +17,6 @@ library(ggplot2)
 library(wesanderson)
 library(gridExtra)
 ```
-# Encoding cvsi
-
-## Open datafile
-
-Open the original csv files and combine for every session and participant
-```{r open data}
-path = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn3 - Sequential encoding/Data/Processed/EEG/Locked encoding/timecourse average/'
-
-filename = 'mean_cvsi_motor_beta_postenc.csv'
-headername = 'header_mean_cvsi_motor_beta_postenc.csv'
-
-data = read.csv(paste(path, filename, sep = ""))
-names(data) = names(read.csv(paste(path, headername, sep = "")))
-
-subjects = 1:25
-
-for (sub in 1:length(subjects)) {
-  sub
-  if (sub < 10) {
-    subjects[sub] = paste('s0', as.character(sub), sep = "")
-  } else {
-    subjects[sub] = paste('s', as.character(sub), sep = "")
-  }
-}
-```
-
-## Summarise the data
-
-```{r timecourse average: load x moment}
-
-summary.tcravg.subj.load.moment = data.frame(row.names = 1:(length(subjects)*length(data)))
-
-summary.tcravg.subj.load.moment$subjectID      = rep(subjects, length(data))
-summary.tcravg.subj.load.moment$loadType       = c(rep('load one-T1', 2*length(subjects)), 
-                                                            rep('load one-T2', 2*length(subjects)), 
-                                                            rep('load two',  2*length(subjects)))
-summary.tcravg.subj.load.moment$momentType     = rep(c(rep('postenc-T1', length(subjects)), rep('postenc-T2', length(subjects))),3)
-summary.tcravg.subj.load.moment$timecourseAvg  = c(data$load1.T1.T1, data$load1.T1.T2, 
-                                                            data$load1.T2.T1, data$load1.T2.T2, 
-                                                            data$load2.T1, data$load2.T2)
-
-summary.tcravg.load.moment = summarySE(data = summary.tcravg.subj.load.moment,
-                                              measurevar = "timecourseAvg",
-                                              groupvars = c("loadType", "momentType"))
-
-summary.tcravg.load.moment
-
-```
-
-## Plot the data
 
 ### Plot settings
 ```{r plot settings}
@@ -97,37 +47,11 @@ legend.none = theme(legend.position = "none")
 
 color_1 = "#50b17b" # green
 color_2 = "#a7d8bc" # lightgreen
+color_3 = "#8C45AC" # purple
+color_4 = "#D0A1E6" # lilac 
 
 ```
 
-### Timecourse average: load x moment
-```{r plot DT avr}
-
-ggplot(summary.tcravg.load.moment, 
-       aes(x = loadType, y = timecourseAvg, 
-           col = interaction(loadType,momentType), 
-           fill = interaction(loadType,momentType), 
-           group = momentType)) +
-  
-  geom_bar(stat = "identity", position = position_dodge(width = 1), 
-           color = "black", width = 0.5, size = 0.4) +
-  
-  geom_errorbar(aes(ymin = timecourseAvg-se, ymax = timecourseAvg+se), width = 0.1, 
-                position = position_dodge(1), size = 0.5, color = "black") +  
-  
-  scale_fill_manual(values = rep(c(color_1, color_2),3))+
-  
-  facet_grid(~loadType, scales = 'free_x')+
-  scale_y_continuous("Average motor beta post-encoding") +
-  scale_x_discrete("Memory load") +
-
-  coord_cartesian(ylim = c(-4,4)) +
-
-  theme_bw() +
-  text.theme +
-  legend.none
-
-```
 # Encoding cvsi performance
 
 ## Open datafile
@@ -136,11 +60,23 @@ Open the original csv files and combine for every session and participant
 ```{r open data perf}
 path = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn3 - Sequential encoding/Data/Processed/EEG/Locked encoding/timecourse average/'
 
-filename = 'mean_cvsi_motor_beta_perf_postenc.csv'
-headername = 'header_mean_cvsi_motor_beta_perf_postenc.csv'
+# Fast - slow
 
-data = read.csv(paste(path, filename, sep = ""))
-names(data) = names(read.csv(paste(path, headername, sep = "")))
+filename = 'fast_slow_postenc.csv'
+headername = 'header_fast_slow_postenc.csv'
+
+fastslow = read.csv(paste(path, filename, sep = ""))
+names(fastslow) = names(read.csv(paste(path, headername, sep = "")))
+
+# Prec - imprec
+
+filename = 'prec_imprec_postenc.csv'
+headername = 'header_prec_imprec_postenc.csv'
+
+precimprec = read.csv(paste(path, filename, sep = ""))
+names(precimprec) = names(read.csv(paste(path, headername, sep = "")))
+
+# Subs
 
 subjects = 1:25
 
@@ -152,35 +88,50 @@ for (sub in 1:length(subjects)) {
     subjects[sub] = paste('s', as.character(sub), sep = "")
   }
 }
+
+
 ```
 
 ## Summarise the data
 
 ```{r timecourse average load 2: moment x perf}
 
-summary.tcravg.subj.moment.perf = data.frame(row.names = 1:(length(subjects)*length(data)))
+# Fast - slow
 
-summary.tcravg.subj.moment.perf$subjectID      = rep(subjects, length(data))
+fastslow.subj.moment.perf = data.frame(row.names = 1:(length(subjects)*length(fastslow)))
 
-summary.tcravg.subj.moment.perf$momentType     = c(rep('load-two-T1', 2*length(subjects)), rep('load-two-T2', 2*length(subjects)))
+fastslow.subj.moment.perf$subjectID      = rep(subjects, length(fastslow))
+fastslow.subj.moment.perf$momentType     = c(rep('load-two-T1', 2*length(subjects)), rep('load-two-T2', 2*length(subjects)))
+fastslow.subj.moment.perf$fastSlow       = rep(c(rep('fast', length(subjects)), rep('slow', length(subjects))),2)
+fastslow.subj.moment.perf$timecourseAvg  = c(fastslow$load2.T1.fast, fastslow$load2.T1.slow, fastslow$load2.T2.fast, fastslow$load2.T2.slow)
 
-summary.tcravg.subj.moment.perf$fastSlow       = rep(c(rep('fast', length(subjects)), rep('slow', length(subjects))),2)
+fastslow.moment.perf = summarySE(data = fastslow.subj.moment.perf,
+                                 measurevar = "timecourseAvg",
+                                 groupvars = c("momentType", "fastSlow"))
+fastslow.moment.perf
 
-summary.tcravg.subj.moment.perf$timecourseAvg  = c(data$load2.T1.fast, data$load2.T1.slow, data$load2.T2.fast, data$load2.T2.slow)
+# Prec - imprec
 
+precimprec.subj.moment.perf = data.frame(row.names = 1:(length(subjects)*length(fastslow)))
 
-summary.tcravg.moment.perf = summarySE(data = summary.tcravg.subj.moment.perf,
-                                              measurevar = "timecourseAvg",
-                                              groupvars = c("momentType", "fastSlow"))
+precimprec.subj.moment.perf$subjectID      = rep(subjects, length(precimprec))
+precimprec.subj.moment.perf$momentType     = c(rep('load-two-T1', 2*length(subjects)), rep('load-two-T2', 2*length(subjects)))
+precimprec.subj.moment.perf$precImprec       = rep(c(rep('prec', length(subjects)), rep('imprec', length(subjects))),2)
+precimprec.subj.moment.perf$timecourseAvg  = c(precimprec$load2.T1.prec, precimprec$load2.T1.imprec, precimprec$load2.T2.prec, precimprec$load2.T2.imprec)
 
-summary.tcravg.moment.perf
+precimprec.moment.perf = summarySE(data = precimprec.subj.moment.perf,
+                                 measurevar = "timecourseAvg",
+                                 groupvars = c("momentType", "precImprec"))
+
+precimprec.moment.perf
 
 ```
 
 ### Timecourse average: moment x perf
-```{r plot DT avr perf}
 
-ggplot(summary.tcravg.moment.perf, 
+```{r plot DT fastslow}
+
+ggplot(fastslow.moment.perf, 
        aes(x = momentType, y = timecourseAvg, 
            col = interaction(momentType,fastSlow), 
            fill = interaction(momentType,fastSlow), 
@@ -192,23 +143,60 @@ ggplot(summary.tcravg.moment.perf,
   geom_errorbar(aes(ymin = timecourseAvg-se, ymax = timecourseAvg+se), width = 0.1, 
                 position = position_dodge(1), size = 0.5, color = "black") +  
   
+  geom_hline(yintercept = 0, linetype = 2) +
+
   scale_fill_manual(values = c(color_1, color_1, color_2, color_2))+
   
-  facet_grid(~momentType, scales = 'free_x')+
+  facet_wrap(~momentType, scales = 'free_x', nrow = 2)+
   scale_y_continuous("Average motor beta post-encoding") +
   scale_x_discrete("Memory load") +
 
   coord_cartesian(ylim = c(-5,2)) +
 
-  theme_bw() +
+  theme_classic() +
+  text.theme +
+  legend.none
+
+```
+
+```{r plot DT precimprec}
+
+ggplot(precimprec.moment.perf, 
+       aes(x = momentType, y = timecourseAvg, 
+           col = interaction(momentType,precImprec), 
+           fill = interaction(momentType,precImprec), 
+           group = precImprec)) +
+  
+  geom_bar(stat = "identity", position = position_dodge(width = 1), 
+           color = "black", width = 0.5, size = 0.4) +
+  
+  geom_errorbar(aes(ymin = timecourseAvg-se, ymax = timecourseAvg+se), width = 0.1, 
+                position = position_dodge(1), size = 0.5, color = "black") +  
+  
+  geom_hline(yintercept = 0, linetype = 2) +
+
+  scale_fill_manual(values = c(color_3, color_3, color_4, color_4))+
+  
+  facet_wrap(~momentType, scales = 'free_x', nrow = 2)+
+  scale_y_continuous("Average motor beta post-encoding") +
+  scale_x_discrete("Memory load") +
+
+  coord_cartesian(ylim = c(-5,2)) +
+
+  theme_classic() +
   text.theme +
   legend.none
 
 ```
 ### ANOVA: moment x perf
 ```{r stat moment x perf}
-anov_RT <- aov(timecourseAvg ~ momentType * fastSlow, data = summary.tcravg.subj.moment.perf)
-summary(anov_RT)
-TukeyHSD(anov_RT)
+
+aov_fastslow <- aov(timecourseAvg ~ momentType * fastSlow, data = fastslow.subj.moment.perf)
+summary(aov_fastslow)
+TukeyHSD(aov_fastslow)
+
+aov_precimprec <- aov(timecourseAvg ~ momentType * precImprec, data = precimprec.subj.moment.perf)
+summary(aov_precimprec)
+TukeyHSD(aov_precimprec)
 
 ```

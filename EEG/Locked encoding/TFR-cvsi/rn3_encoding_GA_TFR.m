@@ -119,6 +119,11 @@ mean_cvsi_encoding_all.mask_motor_load_one_T1   = logical(reshape([mask_left, [m
 mean_cvsi_encoding_all.mask_motor_load_one_T2   = logical(reshape([mask_left, [mask_bot; squeeze(stat_encoding.motor_load_one_T2.mask); mask_top], mask_right], 1,38,94));
 mean_cvsi_encoding_all.mask_motor_load_two      = logical(reshape([mask_left, [mask_bot; squeeze(stat_encoding.motor_load_two.mask); mask_top], mask_right], 1,38,94));
 
+mean_cvsi_encoding_all.mask_visual_load_one_T1   = logical(reshape([mask_left, [mask_bot; squeeze(stat_encoding.visual_load_one_T1.mask); mask_top], mask_right], 1,38,94));
+mean_cvsi_encoding_all.mask_visual_load_one_T2   = logical(reshape([mask_left, [mask_bot; squeeze(stat_encoding.visual_load_one_T2.mask); mask_top], mask_right], 1,38,94));
+mean_cvsi_encoding_all.mask_visual_load_two      = logical(reshape([mask_left, [mask_bot; squeeze(stat_encoding.visual_load_two.mask); mask_top], mask_right], 1,38,94));
+
+
 %% Save
 
 save ([param.path, '/Processed/EEG/Locked encoding/tfr contrasts encoding/cvsi_encoding_all'], 'cvsi_encoding_all');

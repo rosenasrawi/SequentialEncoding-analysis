@@ -133,23 +133,31 @@ for i = 1:length(titles_perf_contrasts)
 
 end
 
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 800 250]);
+
+%% Save
+
+saveas(gcf, [param.figpath '/TFR-performance/TC-motor-fastslow'], 'epsc');
+saveas(gcf, [param.figpath '/TFR-performance/TC-motor-fastslow'], 'png');
+
 %% Fast, slow; Load 2; post-encoding bargraph
 
-mean_cvsi_motor_beta_perf_postenc = [];
+fast_slow_postenc = [];
 
 cvsi_motor_beta = {squeeze(mean(squeeze(cvsi_perf_all.motor_load_two_T1_fast(:,:,clust_freq_index,:)),2)), squeeze(mean(squeeze(cvsi_perf_all.motor_load_two_T2_fast(:,:,clust_freq_index,:)),2)), squeeze(mean(squeeze(cvsi_perf_all.motor_load_two_T1_slow(:,:,clust_freq_index,:)),2)), squeeze(mean(squeeze(cvsi_perf_all.motor_load_two_T2_slow(:,:,clust_freq_index,:)),2))};
 
 for contrast = 1:length(cvsi_motor_beta)
-    mean_cvsi_motor_beta_perf_postenc = [mean_cvsi_motor_beta_perf_postenc, mean(cvsi_motor_beta{contrast}(:,clust_time_index),2)];    
+    fast_slow_postenc = [fast_slow_postenc, mean(cvsi_motor_beta{contrast}(:,clust_time_index),2)];    
 end    
 
-mean_cvsi_motor_beta_perf_postenc = [zeros(1,size(mean_cvsi_motor_beta_perf_postenc,2)); mean_cvsi_motor_beta_perf_postenc];
+fast_slow_postenc = [zeros(1,size(fast_slow_postenc,2)); fast_slow_postenc];
 header_perf = {'load2-T1-fast', 'load2-T2-fast', 'load2-T1-slow', 'load2-T2-slow'};
 
 %% Save as .csv
 
-writematrix(mean_cvsi_motor_beta_perf_postenc, [param.path 'Processed/EEG/Locked encoding/timecourse average/mean_cvsi_motor_beta_perf_postenc.csv'] ) 
-writecell(header_perf, [param.path 'Processed/EEG/Locked encoding/timecourse average/header_mean_cvsi_motor_beta_perf_postenc.csv'] ) 
+writematrix(fast_slow_postenc, [param.path 'Processed/EEG/Locked encoding/timecourse average/fast_slow_postenc.csv'] ) 
+writecell(header_perf, [param.path 'Processed/EEG/Locked encoding/timecourse average/header_fast_slow_postenc.csv'] ) 
 
 
 %% --------------------- Precise versus imprecise ---------------------
@@ -227,7 +235,7 @@ for i = 1:length(titles_perf_contrasts)
     frevede_errorbarplot(mean_cvsi_perf_all.time, cvsi_motor_beta_imprec{i}, [80/255, 172/255, 123/255], 'se');
 
     xline(0); xline(1); xline(3); yline(0)
-    xlim([-0.5 3.5]); ylim([-7 7])
+    xlim([0 3]); ylim([-7 7])
     title(titles_perf_contrasts{i})
 
 end
@@ -244,11 +252,36 @@ for i = 1:length(titles_perf_contrasts)
     subplot(1,2,i)
     frevede_errorbarplot(mean_cvsi_perf_all.time, cvsi_motor_beta_prec{i}, [140/255, 69/255, 172/255], 'se');
     hold on;
-    frevede_errorbarplot(mean_cvsi_perf_all.time, cvsi_motor_beta_imprec{i}, [80/255, 172/255, 123/255], 'se');
+    frevede_errorbarplot(mean_cvsi_perf_all.time, cvsi_motor_beta_imprec{i}, [220/255, 183/255, 229/255], 'se');
 
     xline(0); xline(1); xline(3); yline(0)
-    xlim([-0.5 3.5]); ylim([-7 7])
+    xlim([0 3]); ylim([-7 7])
     title(titles_perf_contrasts{i})
 
 end
 
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 800 250]);
+
+%% Save
+
+saveas(gcf, [param.figpath '/TFR-performance/TC-motor-precimprec'], 'epsc');
+saveas(gcf, [param.figpath '/TFR-performance/TC-motor-precimprec'], 'png');
+
+%% prec, imprec; Load 2; post-encoding bargraph
+
+prec_imprec_postenc = [];
+
+cvsi_motor_beta = {squeeze(mean(squeeze(cvsi_perf_all.motor_load_two_T1_prec(:,:,clust_freq_index,:)),2)), squeeze(mean(squeeze(cvsi_perf_all.motor_load_two_T2_prec(:,:,clust_freq_index,:)),2)), squeeze(mean(squeeze(cvsi_perf_all.motor_load_two_T1_imprec(:,:,clust_freq_index,:)),2)), squeeze(mean(squeeze(cvsi_perf_all.motor_load_two_T2_imprec(:,:,clust_freq_index,:)),2))};
+
+for contrast = 1:length(cvsi_motor_beta)
+    prec_imprec_postenc = [prec_imprec_postenc, mean(cvsi_motor_beta{contrast}(:,clust_time_index),2)];    
+end    
+
+prec_imprec_postenc = [zeros(1,size(prec_imprec_postenc,2)); prec_imprec_postenc];
+header_perf = {'load2-T1-prec', 'load2-T2-prec', 'load2-T1-imprec', 'load2-T2-imprec'};
+
+%% Save as .csv
+
+writematrix(prec_imprec_postenc, [param.path 'Processed/EEG/Locked encoding/timecourse average/prec_imprec_postenc.csv'] ) 
+writecell(header_perf, [param.path 'Processed/EEG/Locked encoding/timecourse average/header_prec_imprec_postenc.csv'] ) 

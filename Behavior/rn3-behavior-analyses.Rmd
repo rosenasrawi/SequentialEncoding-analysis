@@ -11,8 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r packages, include = 'false'}
 library(Rmisc)
 library(dplyr)
+library(tidyr)
 library(data.table)
 library(ggplot2)
+library(ggrain)
 library(wesanderson)
 library(gridExtra)
 ```
@@ -50,10 +52,6 @@ head(data)
 
 Clean the data by decision times
 
-```{r hist raw data}
-histogram(data$responseTime)
-```
-
 ```{r clean data}
 slow_trials_all = c()
 
@@ -84,10 +82,6 @@ data$goodBadTrials[slow_trials_all] = F
 data$goodBadTrials[which(data$responseTime >= 5)] = F
 data$goodBadTrials[which(data$responseTime <= 0.1)] = F
 
-```
-
-```{r hist clean data}
-histogram(data$responseTimeClean)
 ```
 
 ## Conditions as factors
@@ -179,7 +173,6 @@ nblocks = sum(data$subjectID == 's01')/ntrials
 block = c()
 for (b in 1:nblocks) {block = append(block, rep(b, ntrials))}
 
-
 # define stay/switch for each sub
 
 stay_switch = c()
@@ -236,12 +229,9 @@ write.csv(data, '/Users/rosenasrawi/Documents/VU PhD/Projects/rn3 - Sequential e
 
 ```
 
-
-
 ## Summarise the data
 
 ### Decision times
-
 
 ```{r DT: load x targetmoment, upper & right}
 
@@ -254,20 +244,9 @@ summary.rt.load.moment.dial = summarySEwithin(data = summary.rt.subj.load.moment
                                               withinvars = c("dialType", "loadType", "targetMoment"),
                                               idvar = "subjectID")
 
-summary.rt.subj.colprobed = aggregate(data = data,
-                                      responseTimeClean ~ subjectID + colProbed,
-                                      mean)
-summary.rt.colprobed = summarySEwithin(data = summary.rt.subj.colprobed,
-                                       measurevar = "responseTimeClean",
-                                       withinvars = c("colProbed"))
-
-
-summary.rt.subj.load.moment.dial
-summary.rt.load.moment.dial
 ```
 
 ### Errors
-
 
 ```{r Err: load x targetmoment, upper & right}
 
@@ -279,14 +258,6 @@ summary.err.load.moment.dial = summarySEwithin(data = summary.err.subj.load.mome
                                                measurevar = "difference",
                                                withinvars = c("dialType", "loadType", "targetMoment"),
                                                idvar = "subjectID")
-
-summary.err.subj.colprobed = aggregate(data = data,
-                                      difference ~ subjectID + colProbed,
-                                      mean)
-summary.err.colprobed = summarySEwithin(data = summary.err.subj.colprobed,
-                                       measurevar = "difference",
-                                       withinvars = c("colProbed"))
-
 
 ```
 
@@ -319,150 +290,230 @@ legend.theme = theme(legend.position = "bottom",
 
 legend.none = theme(legend.position = "none")
 
+color_0 = "#f58b57"
 color_1 = "#8C45AC" # purple
 color_2 = "#D0A1E6" # lilac 
 color_3 = "#50AC7B" # green
 color_4 = "#B1E6C9" # light green
+ 
+color_5 = "#FFFF99"
+color_6 = "#FFD700"
+color_7 = "#FFA500"
 
 ```
-
-## Per subject
 
 ### Decision times
-```{r plot DT sub}
 
-ggplot(summary.rt.subj.load.moment.dial, 
-       aes(x = loadType, y = responseTimeClean, 
-           col = interaction(loadType,targetMoment), 
-           fill = interaction(loadType,targetMoment), 
-           group = targetMoment)) +
-  
-  geom_bar(stat = "identity", position = position_dodge(width = 1), 
-           color = "black", width = 0.7, size = 0.4) +
-  
-  scale_fill_manual(values = c(color_1, color_2, color_3, color_4),
-                    breaks = c("One.Early", "One.Late", "Two.Early", "Two.Late"),
-                    name = "Target moment",
-                    labels = c("Early","Late","Early","Late"))+
-  
-  facet_grid(dialType~subjectID, scales = 'free_x')+
-  scale_y_continuous("Decision time (s)") +
-  scale_x_discrete("Memory load") +
-
-  coord_cartesian(ylim = c(0.1,2)) +
-
-  theme_bw() +
-  text.theme +
-  legend.theme
-
-```
-
-### Absolute errors
-```{r plot err sub}
-
-ggplot(summary.err.subj.load.moment.dial, 
-       aes(x = loadType, y = difference, 
-           col = interaction(loadType,targetMoment), 
-           fill = interaction(loadType,targetMoment), 
-           group = targetMoment)) +
-  
-  geom_bar(stat = "identity", position = position_dodge(width = 1), 
-           color = "black", width = 0.7, size = 0.4) +
-  
-  scale_fill_manual(values = c(color_1, color_2, color_3, color_4),
-                    breaks = c("One.Early", "One.Late", "Two.Early", "Two.Late"),
-                    name = "Target moment",
-                    labels = c("Early","Late","Early","Late"))+
-  
-  facet_grid(dialType~subjectID, scales = 'free_x')+
-  scale_y_continuous("Absolute error (degrees)") +
-  scale_x_discrete("Memory load") +
-
-  coord_cartesian(ylim = c(1,40)) +
-
-  theme_bw() +
-  text.theme +
-  legend.theme
-
-```
-
-## Average
-
-### Decision times
 ```{r plot DT avr}
 
-ggplot(summary.rt.load.moment.dial, 
-       aes(x = loadType, y = responseTimeClean, 
-           col = interaction(loadType,targetMoment), 
-           fill = interaction(loadType,targetMoment), 
-           group = targetMoment)) +
-  
-  geom_bar(stat = "identity", position = position_dodge(width = 1), 
-           color = "black", width = 0.7, size = 0.4) +
-  
-  geom_errorbar(aes(ymin = responseTimeClean-se, ymax = responseTimeClean+se), width = 0.1, 
-                position = position_dodge(1), size = 0.5, color = "black") +  
-  
-  geom_jitter(data = summary.rt.subj.load.moment.dial, 
-              aes(group = interaction(targetMoment, loadType)), 
-              position = position_jitterdodge(dodge.width = 1, jitter.width = 0.5), 
-              color = "grey", size = 0.6) +
-
+ggplot(summary.rt.load.moment.dial, aes(x = loadType, y = responseTimeClean, 
+                                        col = interaction(loadType, targetMoment), 
+                                        fill = interaction(loadType, targetMoment), 
+                                        group = targetMoment)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), color = "black", 
+           width = 0.6, size = 0.4) +
+  geom_errorbar(aes(ymin = responseTimeClean - se, ymax = responseTimeClean + se), 
+                width = 0.2, position = position_dodge(0.7), size = 0.5, color = "black") +
   scale_fill_manual(values = c(color_1, color_2, color_3, color_4),
                     breaks = c("One.Early", "One.Late", "Two.Early", "Two.Late"),
-                    name = "Target moment",
-                    labels = c("Early","Late","Early","Late"))+
-  
-  facet_grid(~dialType, scales = 'free_x')+
-  scale_y_continuous("Decision time (s)") +
-  scale_x_discrete("Memory load") +
+                    name = "Target Moment",
+                    labels = c("Early", "Late", "Early", "Late")) +
+  facet_grid(~dialType, scales = "free_x") +
+  labs(x = "Memory Load", y = "Decision Time (s)") +
+  coord_cartesian(ylim = c(0.1, 0.9)) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(size = 10),
+    axis.text.x = element_text(size = 10, color = "black"),
+    axis.text.y = element_text(size = 10, color = "black"),
+    axis.title.x = element_text(size = 12, color = "black", face = "bold"),
+    axis.title.y = element_text(size = 12, color = "black", face = "bold"),
+    strip.text = element_text(size = 12, color = "black", face = "bold")
+  )
 
-  coord_cartesian(ylim = c(0.1,1)) +
 
-  theme_bw() +
-  text.theme +
-  legend.theme
+
 
 ```
 
 ### Errors
 ```{r plot err avr}
 
-ggplot(summary.err.load.moment.dial, 
-       aes(x = loadType, y = difference, 
-           col = interaction(loadType,targetMoment), 
-           fill = interaction(loadType,targetMoment), 
-           group = targetMoment)) +
-  
-  geom_bar(stat = "identity", position = position_dodge(width = 1), 
-           color = "black", width = 0.7, size = 0.4) +
-
-  geom_errorbar(aes(ymin = difference-se, ymax = difference+se), width = 0.1, 
-                position = position_dodge(0.9), size = 0.5, color = "black") +  
-  
-  geom_jitter(data = summary.err.subj.load.moment.dial, 
-              aes(group = interaction(targetMoment, loadType)), 
-              position = position_jitterdodge(dodge.width = 1, jitter.width = 0.5), 
-              color = "grey", size = 0.6) +
-  
+ggplot(summary.err.load.moment.dial, aes(x = loadType, y = difference, 
+                                        col = interaction(loadType, targetMoment), 
+                                        fill = interaction(loadType, targetMoment), 
+                                        group = targetMoment)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), color = "black", 
+           width = 0.6, size = 0.4) +
+  geom_errorbar(aes(ymin = difference - se, ymax = difference + se), 
+                width = 0.2, position = position_dodge(0.7), size = 0.5, color = "black") +
   scale_fill_manual(values = c(color_1, color_2, color_3, color_4),
                     breaks = c("One.Early", "One.Late", "Two.Early", "Two.Late"),
-                    name = "Target moment",
-                    labels = c("Early","Late","Early","Late"))+
-  
-  facet_grid(~dialType, scales = 'free_x')+
-  scale_y_continuous("Absolute error (degrees)") +
-  scale_x_discrete("Memory load") +
-
-  coord_cartesian(ylim = c(1,23)) +
-
-  theme_bw() +
-  text.theme +
-  legend.theme
+                    name = "Target Moment",
+                    labels = c("Early", "Late", "Early", "Late")) +
+  facet_grid(~dialType, scales = "free_x") +
+  labs(x = "Memory Load", y = "Absolute error (deg)") +
+  coord_cartesian(ylim = c(3, 22)) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(size = 10),
+    axis.text.x = element_text(size = 10, color = "black"),
+    axis.text.y = element_text(size = 10, color = "black"),
+    axis.title.x = element_text(size = 12, color = "black", face = "bold"),
+    axis.title.y = element_text(size = 12, color = "black", face = "bold"),
+    strip.text = element_text(size = 12, color = "black", face = "bold")
+  )
 
 ```
-### Precision per angle
 
+### Raincloud main effects
+
+```{r DT main effect}
+
+rt.sub.load = data %>% 
+  group_by(subjectID, loadType) %>% 
+  summarise(loadRT = mean(responseTimeClean, na.rm = TRUE)) %>% 
+  pivot_wider(names_from = loadType, values_from = loadRT) %>% 
+  transmute(Effect = Two - One)
+
+rt.sub.dial = data %>% 
+  group_by(subjectID, dialType) %>% 
+  summarise(dialRT=mean(responseTimeClean, na.rm=TRUE)) %>% 
+  pivot_wider(names_from=dialType,values_from=dialRT) %>% 
+  transmute(Effect = Right - Up)
+
+rt.sub.momt = data %>% 
+  group_by(subjectID, targetMoment) %>% 
+  summarise(momentRT=mean(responseTimeClean, na.rm=TRUE)) %>% 
+  pivot_wider(names_from=targetMoment,values_from=momentRT) %>% 
+  transmute(Effect = Early - Late)
+
+rt.effects = bind_rows(
+  list(Load = rt.sub.load, Dial = rt.sub.dial, Moment = rt.sub.momt),
+  .id = 'effectType')
+
+rt.effects$effectType = factor(rt.effects$effectType, levels=c("Load", "Dial", "Moment"))
+rt.effects$effectType = factor(rt.effects$effectType, levels = rev(levels(rt.effects$effectType)))
+
+```
+
+```{r err main effect}
+
+err.sub.load = data %>% 
+  group_by(subjectID, loadType) %>% 
+  summarise(loadRT = mean(difference, na.rm = TRUE)) %>% 
+  pivot_wider(names_from = loadType, values_from = loadRT) %>% 
+  transmute(Effect = Two - One)
+
+err.sub.dial = data %>% 
+  group_by(subjectID, dialType) %>% 
+  summarise(dialRT=mean(difference, na.rm=TRUE)) %>% 
+  pivot_wider(names_from=dialType,values_from=dialRT) %>% 
+  transmute(Effect = Right - Up)
+
+err.sub.momt = data %>% 
+  group_by(subjectID, targetMoment) %>% 
+  summarise(momentRT=mean(difference, na.rm=TRUE)) %>% 
+  pivot_wider(names_from=targetMoment,values_from=momentRT) %>% 
+  transmute(Effect = Early - Late)
+
+err.effects = bind_rows(
+  list(Load = err.sub.load, Dial = err.sub.dial, Moment = err.sub.momt),
+  .id = 'effectType')
+
+err.effects$effectType = factor(err.effects$effectType, levels=c("Load", "Dial", "Moment"))
+err.effects$effectType <- factor(err.effects$effectType, levels = rev(levels(err.effects$effectType)))
+
+```
+
+``` {r rain DT main effects}
+
+ggplot(rt.effects, aes(x = effectType, y = Effect, fill = effectType))+ 
+  
+  geom_rain(point.args = rlang::list2(color = "grey", size = 1.5),
+            violin.args = list(alpha = 1, size = 1, linewidth = 0.7, width = 1),
+            boxplot.args = list(alpha = 1, linewidth = 0.7, width = .075)) +
+  
+  geom_hline(yintercept = 0, linetype = 2) +
+
+  scale_fill_manual(values = c(color_5, color_6, color_7)) +
+
+  scale_y_continuous("Decision time difference (s)") +
+  scale_x_discrete("Main effects") +
+
+  theme_classic() +
+  text.theme +
+  legend.none +
+  coord_flip()
+
+```
+
+``` {r rain DT main effects flipped}
+
+ggplot(rt.effects, aes(x = effectType, y = Effect, fill = effectType)) +
+  
+  geom_violin(alpha = 1, size = 0.75, width = 0.8, trim = FALSE) +
+  geom_boxplot(alpha = 1, width = 0.1, outlier.shape = NA) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  
+  scale_fill_manual(values = c(color_5, color_6, color_7)) +
+  scale_y_continuous("Decision time difference (s)") +
+  scale_x_discrete("Main effects") +
+
+  theme_classic() +
+  text.theme +
+  legend.none +
+  coord_flip()
+
+```
+
+``` {r rain err main effects}
+
+ggplot(err.effects, aes(x = effectType, y = Effect, fill = effectType))+ 
+  
+  geom_rain(point.args = rlang::list2(color = "grey", size = 1.5),
+            violin.args = list(alpha = 1, size = 1, linewidth = 0.7, width = 1),
+            boxplot.args = list(alpha = 1, linewidth = 0.7, width = .075)) +
+  
+  geom_hline(yintercept = 0, linetype = 2) +
+
+  scale_fill_manual(values = c(color_5, color_6, color_7)) +
+
+  scale_y_continuous("Error difference (deg)") +
+  scale_x_discrete("Main effects") +
+
+  theme_classic() +
+  text.theme +
+  legend.none +
+  coord_flip()
+
+```
+
+```{r rain err main effects flipped }
+
+ggplot(err.effects, aes(x = effectType, y = Effect, fill = effectType)) +
+  
+  geom_violin(alpha = 1, size = 0.75, width = 0.8, trim = FALSE) +
+  geom_boxplot(alpha = 1, width = 0.1, outlier.shape = NA) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  
+  scale_fill_manual(values = c(color_5, color_6, color_7)) +
+  scale_y_continuous("Error difference (deg)") +
+  scale_x_discrete("Main effects") +
+
+  theme_classic() +
+  text.theme +
+  legend.none +
+  coord_flip()
+
+```
+
+
+### Precision per angle
 
 ```{r plot prec per angle}
 
@@ -488,11 +539,6 @@ for (b in 1:nbins) {
   bin_titles[b] = paste(as.character(this_bin[1]), "to", as.character(this_bin[2]))
 }
 
-precision_density = data.frame(Target = as.factor(data$TargetOri90Steps), Report = data$repDegree90)
-precision_density$loadType = data$loadType
-
-# Plot
-
 colfunc <- colorRampPalette(c("blue3", "white"))
 blue_grad = colfunc(round(nbins/2)+2)
 blue_grad = blue_grad[-c(round(nbins/2)+2, round(nbins/2)+1)]
@@ -502,6 +548,12 @@ red_grad = colfunc(nbins-round(nbins/2)+2)
 red_grad = red_grad[-c(1,2)]
 
 blue_red = c(blue_grad, red_grad)
+```
+
+```{r plot prec per angle, load}
+
+precision_density = data.frame(Target = as.factor(data$TargetOri90Steps), Report = data$repDegree90)
+precision_density$loadType = data$loadType
 
 ggplot(precision_density, aes(x=Report, color=Target)) +
   
@@ -517,6 +569,28 @@ ggplot(precision_density, aes(x=Report, color=Target)) +
   text.theme +
   legend.theme +
   guides(colour = guide_legend(override.aes=list(size=0.5)))
+
+```
+```{r plot prec per angle, target moment}
+
+precision_density$targetMoment = data$targetMoment
+
+ggplot(precision_density, aes(x=Report, color=Target)) +
+  
+  geom_density(show.legend = FALSE) + 
+  stat_density(geom = "line", position = "identity", size = 0.8) + 
+  scale_color_manual(labels = bin_titles, values = blue_red)+
+  scale_x_continuous("Reported orientation") +
+  scale_y_continuous("Response density") +
+
+  facet_wrap(~loadType + targetMoment, scales = 'free_x', nrow = 2)+
+  
+  theme_classic() +
+
+  theme(legend.key.size = unit(0.5, "lines")) +
+  labs(color = "Target") +
+  guides(color = guide_legend(override.aes = list(size = 1))) +
+  ggtitle("Density Plot of Reported Orientation by Target and Load Type")
 
 ```
 
