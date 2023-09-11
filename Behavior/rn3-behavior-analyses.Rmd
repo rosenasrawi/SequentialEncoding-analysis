@@ -582,11 +582,11 @@ ggplot(precision_density, aes(x=Report, color=Target)) +
   scale_color_manual(labels = bin_titles, values = blue_red)+
   scale_x_continuous("Reported orientation") +
   scale_y_continuous("Response density") +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
 
   facet_wrap(~loadType + targetMoment, scales = 'free_x', nrow = 2)+
   
   theme_classic() +
+
   theme(legend.key.size = unit(0.5, "lines")) +
   labs(color = "Target") +
   guides(color = guide_legend(override.aes = list(size = 1))) +
